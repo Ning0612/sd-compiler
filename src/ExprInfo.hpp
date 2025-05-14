@@ -4,7 +4,7 @@
 #include <string>
 
 // Enumeration to indicate the kind of constant value stored
-enum ValueKind { VK_None, VK_Int, VK_Float, VK_Double, VK_Bool, VK_String };
+enum ValueKind { VK_None, VK_Int, VK_Float, VK_Bool, VK_String };
 
 // Structure to represent expression information during semantic analysis
 struct ExprInfo {
@@ -17,7 +17,6 @@ struct ExprInfo {
     union {
         int iVal;
         float fVal;
-        double dVal;
         bool bVal;
     };
 
@@ -29,7 +28,6 @@ struct ExprInfo {
     // Setters for different constant values
     void setInt(int v);
     void setFloat(float v);
-    void setDouble(double v);
     void setBool(bool v);
     void setString(const std::string& s);
 
@@ -39,7 +37,6 @@ struct ExprInfo {
     // Getters for constant values, will throw if type mismatched
     int getInt() const;
     float getFloat() const;
-    double getDouble() const;
     bool getBool() const;
     std::string getString() const;
 

@@ -8,7 +8,6 @@ Symbol::Symbol(const std::string& n, Type* t, bool c)
 
 void Symbol::setInt(int v) { valueKind = VK_Int; iVal = v; }
 void Symbol::setFloat(float v) { valueKind = VK_Float; fVal = v; }
-void Symbol::setDouble(double v) { valueKind = VK_Double; dVal = v; }
 void Symbol::setBool(bool v) { valueKind = VK_Bool; bVal = v; }
 void Symbol::setString(const std::string& s) { valueKind = VK_String; sVal = s; }
 
@@ -25,19 +24,11 @@ void Symbol::setConstValueFromExpr(const ExprInfo* e) {
         case BK_Int:
             if (e->valueKind == VK_Int) setInt(e->getInt());
             else if (e->valueKind == VK_Float) setInt(static_cast<int>(e->getFloat()));
-            else if (e->valueKind == VK_Double) setInt(static_cast<int>(e->getDouble()));
             break;
 
         case BK_Float:
             if (e->valueKind == VK_Int) setFloat(static_cast<float>(e->getInt()));
             else if (e->valueKind == VK_Float) setFloat(e->getFloat());
-            else if (e->valueKind == VK_Double) setFloat(static_cast<float>(e->getDouble()));
-            break;
-
-        case BK_Double:
-            if (e->valueKind == VK_Int) setDouble(static_cast<double>(e->getInt()));
-            else if (e->valueKind == VK_Float) setDouble(static_cast<double>(e->getFloat()));
-            else if (e->valueKind == VK_Double) setDouble(e->getDouble());
             break;
 
         case BK_Bool:
@@ -60,7 +51,6 @@ ExprInfo* Symbol::getExpr() const {
     switch (valueKind) {
         case VK_Int:    e->setInt(iVal); break;
         case VK_Float:  e->setFloat(fVal); break;
-        case VK_Double: e->setDouble(dVal); break;
         case VK_Bool:   e->setBool(bVal); break;
         case VK_String: e->setString(sVal); break;
         default: break;
@@ -87,7 +77,6 @@ void Symbol::dbgPrint() const {
             switch (valueKind) {
                 case VK_Int:    printf("%d", iVal); break;
                 case VK_Float:  printf("%f", fVal); break;
-                case VK_Double: printf("%f", dVal); break;
                 case VK_Bool:   printf("%s", bVal ? "true" : "false"); break;
                 case VK_String: printf("\"%s\"", sVal.c_str()); break;
                 default: break;

@@ -28,7 +28,6 @@ void yyerror(const char* s){
     VarInit* var_init_;
     ExprInfo* expr_info;
 
-    std::vector<int>* int_list;
     std::vector<Symbol>* symbol_list;
     std::vector<ExprInfo>* expr_info_list;
 }
@@ -54,8 +53,6 @@ void yyerror(const char* s){
 %type <expr_info> lvalue
 %type <expr_info_list> arg_list
 %type <expr_info_list> arg_list_opt
-%type <int_list> array_dims
-%type <int_list> array_ref
 %type <var_init_> var_init
 
 /* ---------- Operators / Delimiters ---------- */
@@ -134,7 +131,7 @@ const_decl
     }
     ;
 
-/* Variable / Array Declaration */
+/* Variable Declaration */
 var_decl
     : type_spec var_init_list SEMICOLON 
     ;
@@ -142,11 +139,11 @@ var_decl
 var_init_list
     : var_init{
         VarInit varInit = *$1; delete $1;
-        tryDeclareVarable(ctx->symTab, ctx->typePool, varInit, ctx->nowType, yylineno);
+        tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
     }
     | var_init_list COMMA var_init {
         VarInit varInit = *$3; delete $3;
-        tryDeclareVarable(ctx->symTab, ctx->typePool, varInit, ctx->nowType, yylineno);
+        tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
     }
     ;
 
@@ -163,32 +160,10 @@ var_init
                 SemanticError("assignment from function", yylineno);
             }
 
-            if (expr.type->isArray()) {
-                SemanticError("assignment from array", yylineno);
-            }
-
             if (!expr.isConst) {
                 SemanticError("assignment from non-constant", yylineno);
             }
             $$ = new VarInit(id, expr.type);
-        }
-    }
-    | ID array_dims          { 
-        std::string id = *$1; delete $1;
-        std::vector<int> arrayIndex = *$2; delete $2;
-
-        bool isValid = true;
-        for (auto& index : arrayIndex) {
-            if (index <= 0) {
-                isValid = false;
-                break;
-            }
-        }
-
-        if (!isValid) {
-            $$ = makeInvalidVar();
-        }else{
-            $$ = new VarInit(id, arrayIndex);
         }
     }
     ;
@@ -266,11 +241,6 @@ param
     : type_spec ID {
         std::string id = *$2; delete $2;
         $$ = new Symbol(id, $1, false);
-    }
-    | type_spec ID array_dims{
-        std::string id = *$2; delete $2;
-        std::vector<int> arrayIndex = *$3; delete $3;
-        $$ = new Symbol(id, ctx->typePool.makeArray($1, arrayIndex), false);
     }
     ;
 
@@ -359,25 +329,11 @@ lvalue
                 switch (symbol->type->base) {
                     case BK_Int:   $$->setInt(symbol->iVal); break;
                     case BK_Float: $$->setFloat(symbol->fVal); break;
-                    case BK_Double: $$->setFloat(symbol->dVal); break;
                     case BK_Bool:  $$->setBool(symbol->bVal); break;
                     case BK_String: $$->setString(symbol->sVal); break;
                     default: break;
                 }
             }
-        }
-    }
-    | ID array_ref {
-        std::string id = *$1; delete $1;
-        std::vector<int> arrayIndex = *$2; delete $2;
-
-        Symbol* symbol = ctx->symTab.lookup(id);
-
-        if (symbol == nullptr) {
-            SemanticError("undeclared identifier: " + id, yylineno);
-            $$ = makeInvalidExpr();
-        } else {
-            $$ = resolveArrayAccess(id, ctx->typePool, ctx->symTab, arrayIndex, yylineno);
         }
     }
     ;
@@ -662,7 +618,7 @@ const_lit
         $$->setInt($1);
     }
     | REAL_LIT    {
-        $$ = new ExprInfo(ctx->typePool.make(BK_Double), true);
+        $$ = new ExprInfo(ctx->typePool.make(BK_Float), true);
         $$->setFloat($1);
     }
     | BOOL_LIT    {
@@ -731,39 +687,10 @@ arg_list
     }
     ;
 
-/* Array Dimensions */
-array_dims
-    : LBRACK expression RBRACK {
-        $$ = new std::vector<int>;
-        ExprInfo expr = *$2; delete $2;
-        $$->push_back(checkArrayDimExpr(expr, yylineno));
-    }
-    | array_dims LBRACK expression RBRACK {
-        $$ = $1;
-        ExprInfo expr = *$3; delete $3;
-        $$->push_back(checkArrayDimExpr(expr, yylineno));
-    }
-    ;
-
-/* Array Reference */
-array_ref
-    : LBRACK expression RBRACK {
-        $$ = new std::vector<int>;
-        ExprInfo expr = *$2; delete $2;
-        $$->push_back(extractArrayIndexOrZero(expr, yylineno));
-    }
-    | array_ref LBRACK expression RBRACK {
-        $$ = $1;
-        ExprInfo expr = *$3; delete $3;
-        $$->push_back(extractArrayIndexOrZero(expr, yylineno));
-    }
-    ;
-
 /* Type Specification */
 type_spec
     : INT_TOK    { $$ = ctx->typePool.make(BK_Int); ctx->nowType = $$; }
     | FLOAT_TOK      { $$ = ctx->typePool.make(BK_Float); ctx->nowType = $$; }
-    | DOUBLE_TOK     { $$ = ctx->typePool.make(BK_Double); ctx->nowType = $$; }
     | BOOL_TOK       { $$ = ctx->typePool.make(BK_Bool);  ctx->nowType = $$; }
     | STRING_TOK { $$ = ctx->typePool.make(BK_String); ctx->nowType = $$;}
     ;

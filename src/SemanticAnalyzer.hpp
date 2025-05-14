@@ -15,9 +15,6 @@ int toInt(const ExprInfo e);
 // Convert expression value to float (for const expr)
 float toFloat(const ExprInfo e);
 
-// Convert expression value to double (for const expr)
-double toDouble(const ExprInfo e);
-
 // Convert expression value to bool (for const expr)
 bool toBool(const ExprInfo e);
 
@@ -55,9 +52,6 @@ ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno);
 // Evaluate unary + or - (sign operator)
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno);
 
-// Handle array access (e.g., arr[2][3])
-ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolTable& symTab, const std::vector<int>& arrayIndex, int lineno);
-
 /* ─────────────── Semantic Checks ─────────────── */
 
 // Ensure an expression is boolean in a given context (if, while, etc.)
@@ -71,12 +65,6 @@ void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno);
 
 // Ensure foreach index is declared and mutable
 void checkForeachIndex(Symbol* sym, int lineno);
-
-// Extract int index from an array subscript expression
-int extractArrayIndexOrZero(const ExprInfo& expr, int lineno);
-
-// Check array dimension value is valid and constant
-int checkArrayDimExpr(const ExprInfo& expr, int lineno);
 
 /* ─────────────── Declarations and Checks ─────────────── */
 
@@ -99,7 +87,7 @@ void checkPrint(const ExprInfo& expr, int lineno);
 void checkRead(const ExprInfo& expr, int lineno);
 
 // Try declaring a list of variables (normal or arrays)
-void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& varInit, Type* type, int lineno);
+void tryDeclareVarable(SymbolTable& symTab, const VarInit& varInit, Type* type, int lineno);
 
 // Try declaring a constant (must have a literal value)
 void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const ExprInfo& value, int lineno);

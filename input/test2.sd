@@ -23,12 +23,6 @@ void main() {
     // String variable with constant initialization
     string msg = "Test" + " Case"; // "Test Case"
 
-    // Array declarations
-    int arr[10];                // valid array of 10 integers
-    float table[5];             // valid array of 5 floats
-    bool flags[3];              // valid array of 3 booleans
-    string names[34][20 + 34]; // valid array of strings (2D array)
-
     // This block is to test error cases (invalid constant expression on initialization)
     a++; // Error: a is a constant, cannot be modified
     a = 5; // Error: a is a constant, cannot be modified   

@@ -19,7 +19,6 @@ public:
     union {
         int iVal;
         float fVal;
-        double dVal;
         bool bVal;
     };
     std::string sVal; // string constants
@@ -28,7 +27,6 @@ public:
 
     void setInt(int v);
     void setFloat(float v);
-    void setDouble(double v);
     void setBool(bool v);
     void setString(const std::string& s);
     bool hasConstValue() const;

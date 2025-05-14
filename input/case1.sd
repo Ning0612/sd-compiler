@@ -22,29 +22,22 @@ void main(){
         // Warning: implicit conversion from double to float
     }
 
-    // Test 3: Double constant folding and implicit type conversion
+    // Test 3: Boolean logic folding
     else if (condition == 3) {
-        const double a = 1.5 + 2.5;                              // 4.0
-        const double b = a * 2;                                  // 8.0
-        const double c = -((5.0 + 3.0) * 20.0 + -3.0 - -5.0) / 5; // -32.4
-    }
-
-    // Test 4: Boolean logic folding
-    else if (condition == 4) {
         const bool a = true || false;                          // true
         const bool b = a && false;                             // false
         const bool c = !a || b;                                // false
     }
 
     // Test 5: String constant folding via concatenation
-    else if (condition == 5) {
+    else if (condition == 4) {
         const string a = "Test" + " Case";                     // "Test Case"
         const string b = a + " is valid";                      // "Test Case is valid"
         const string c = b + " !";                             // "Test Case is valid !"
     }
 
     // Test 6: Runtime variables and illegal constant expressions (division/mod by zero)
-    else if (condition == 6) {
+    else if (condition == 5) {
         int a = 1 + 2 * 3;
         const int zc = 0;
         int z = 0;

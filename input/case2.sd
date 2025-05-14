@@ -1,50 +1,39 @@
-// Test for 
-// - Array declarations
-// - Array size must be a constant integer expression
-// - Array size must be greater than 0
-// - No initialization is allowed
-// - Array references and index validation
+// Test for
+// - Function declaration and return type checking
+// - Function call argument type and count matching
+// - Array argument dimension size checking
+// - Variable name conflict with function
+// - Implicit type conversions (int <-> float)
 
-void main(){
-    int condition = 1;
+int add(int a, int b) {
+    return a + b;
+}
 
-    // Test 1: Valid declarations and array accesses
-    if (condition == 1) {
-        // Valid 1D array declarations with constant expressions
-        int a[5];               // size = 5
-        float b[2 + 3];         // size = 5
-        bool c[10 - 5];         // size = 5
-        string d[2 * 3];        // size = 6
+float multiply(float a, float b) {
+    return a * b;
+}
 
-        // Valid multi-dimensional array declarations
-        int m1[3][4];           // sizes = 3 and 4
-        float m2[1 + 2][2 * 2]; // sizes = 3 and 4
-        bool m3[7 - 2][3 + 1];  // sizes = 5 and 4
+string errorTest() {
+    return "error test"; // Error: return type is string, but returning int
+}
 
-        // Variable declarations
-        int ival;
-        float fval;
-        bool bval;
-        string sval;
+void main() {
+    int a = 5;
+    int b = 10;
+    float c = 2.5;
+    float d = 4.0;
 
-        // Valid array accesses using constant and variable indices
-        ival = a[0];         // accessing first element of array 'a'
-        fval = b[2];         // accessing third element of array 'b'
-        bval = c[ival];      // accessing element of 'c' using value of 'ival'
-        sval = d[ival];      // accessing element of 'd' using value of 'ival'
-        bval = m1[2][3];    // accessing element of 'm1' using constant indices
-    } 
-    // Test 2: Invalid array declarations and index errors
-    else {
-        int arr[5];           // valid array declaration
-        int arrs[0];          // Error: size must be greater than 0
+    // Function calls
+    int sumInt;
+    float sumDouble;
 
-        const int r = 2 + 5;  // constant expression, value = 7
-        int c = 6;            // variable used as index
+    sumInt = add(a, b);             // Valid call
+    sumInt = add(a + b, c);         // Implicit conversion from float to int
+    sumDouble = add(c, d);          // Implicit conversion: float to int, then result assigned to float
 
-        arr[-1] = 30;         // Error: index is negative
-        arr[r] = 30;          // Error: index 7 out of bounds for array size 5
-        arr[c] = 30;          // Valid: c is a variable, check deferred to runtime
-        arr["dfaf"] = 30;     // Error: index is a string, not an integer
-    }
+    // Multiplication
+    float product;
+    product = multiply(c, d);       // Valid call
+    print "Product: ";
+    println product;
 }

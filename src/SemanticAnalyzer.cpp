@@ -4,19 +4,17 @@
 
 // convert ExprInfo to basic types
 int toInt(const ExprInfo e){
-    return (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : (e.valueKind==VK_Double)? static_cast<int>(e.getDouble()) : 0;
+    return (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : 0;
 }
 float toFloat(const ExprInfo e){
-    return (e.valueKind==VK_Float)? e.getFloat() : (e.valueKind==VK_Double)? e.getDouble() : (e.valueKind==VK_Int)? e.getInt() : 0.0f;
+    return (e.valueKind==VK_Float)? e.getFloat() : (e.valueKind==VK_Int)? e.getInt() : 0.0f;
 }
-double toDouble(const ExprInfo e){
-    return (e.valueKind==VK_Double)? e.getDouble() : (e.valueKind==VK_Float)? e.getFloat() : (e.valueKind==VK_Int)? e.getInt() : 0.0;
-}
+
 bool toBool(const ExprInfo e){
-    return (e.valueKind==VK_Bool)? e.getBool() : (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : (e.valueKind==VK_Double)? static_cast<int>(e.getDouble()) : false;
+    return (e.valueKind==VK_Bool)? e.getBool() : (e.valueKind==VK_Int)? e.getInt() : (e.valueKind==VK_Float)? static_cast<int>(e.getFloat()) : false;
 }
 std::string toString(const ExprInfo e){
-    return (e.valueKind==VK_String)? e.getString() : (e.valueKind==VK_Int)? std::to_string(e.getInt()) : (e.valueKind==VK_Float)? std::to_string(e.getFloat()) : (e.valueKind==VK_Double)? std::to_string(e.getDouble()) : "";
+    return (e.valueKind==VK_String)? e.getString() : (e.valueKind==VK_Int)? std::to_string(e.getInt()) : (e.valueKind==VK_Float)? std::to_string(e.getFloat()) : "";
 }
 
 /*───────── Type Compatibility ─────────*/
@@ -119,11 +117,6 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
             float r = (op==OPADD)?a+b : (op==OPSUB)?a-b :
                       (op==OPMUL)?a*b : (op==OPDIV)?a/b : a; // no mod
             result->setFloat(r);
-        }else if(resultBase==BK_Double){
-            double a=toDouble(lhs), b=toDouble(rhs);
-            double r = (op==OPADD)?a+b : (op==OPSUB)?a-b :
-                       (op==OPMUL)?a*b : (op==OPDIV)?a/b : a; // no mod
-            result->setDouble(r);
         }else if(resultBase==BK_Int){
             int a=lhs.getInt(), b=rhs.getInt();
             int r = (op==OPADD)?a+b : (op==OPSUB)?a-b :
@@ -171,10 +164,6 @@ ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeAr
     if(isConst){
         if(resultBase==BK_Float){
             float a=toFloat(lhs), b=toFloat(rhs);
-            bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
-            result->setBool(r);
-        }else if(resultBase==BK_Double){
-            double a=toDouble(lhs), b=toDouble(rhs);
             bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
             result->setBool(r);
         }else if(resultBase==BK_Int){
@@ -287,7 +276,7 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
         return makeInvalidExpr();
     }
 
-    if (expr.type->base != BK_Int && expr.type->base != BK_Float && expr.type->base != BK_Double){
+    if (expr.type->base != BK_Int && expr.type->base != BK_Float){
         SemanticError("unary op on non-numeric type", lineno);
         return makeInvalidExpr();
     }
@@ -301,55 +290,12 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
             case VK_Float:
                 result->setFloat(isMinus ? -expr.getFloat() : expr.getFloat());
                 break;
-            case VK_Double:
-                result->setDouble(isMinus ? -expr.getDouble() : expr.getDouble());
-                break;
             default:
                 SemanticError("unsupported unary constant type", lineno);
                 return makeInvalidExpr();
         }
     }
     return result;
-}
-
-/*───────── resolve array access ─────────*/
-ExprInfo* resolveArrayAccess(const std::string& id, TypeArena& typePool, SymbolTable& symTab, const std::vector<int>& arrayIndex, int lineno) {
-    Symbol* symbol = symTab.lookup(id);
-
-    if (symbol) {
-        SemanticError("undeclared identifier: " + id, lineno);
-        return makeInvalidExpr();
-    }
-
-    if (!symbol->type->isArray()) {
-        SemanticError("array index to non-array type: " + id, lineno);
-        return makeInvalidExpr();
-    }
-
-    size_t given = arrayIndex.size();
-    std::vector<int> dims = symbol->type->sizes;
-
-    for (size_t i = 0; i < given; ++i) {
-        int index = arrayIndex[i];
-        int defined = symbol->type->sizes[i];
-
-        if (index != 0 && (index < 0 || index >= defined)) {
-            SemanticError(
-                "array index out of bounds: " + std::to_string(index) +
-                " not in [0.." + std::to_string(defined - 1) + "]",
-                lineno
-            );
-            return makeInvalidExpr();
-        }
-
-        if (!dims.empty()) {
-            dims.erase(dims.begin());
-        }
-    }
-
-    Type* baseType = typePool.make(symbol->type->base);
-    Type* resultType = dims.empty() ? baseType : typePool.makeArray(baseType, dims);
-    return new ExprInfo(resultType, symbol->isConst);
 }
 
 /*───────── check is the expression a bool scalar ─────────*/
@@ -375,18 +321,13 @@ void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno) {
         return;
     }
 
-    if (expr.type->isArray()){
-        SemanticError(op + " cannot be applied to array", lineno);
+    if (!expr.type->isScalar()){
+        SemanticError(op + " cannot be applied to non-scalar type", lineno);
         return;
     }
 
-    if (expr.type->isFunc()){
-        SemanticError(op + " cannot be applied to function", lineno);
-        return;
-    }
-
-    if (expr.type->base != BK_Int && expr.type->base != BK_Float && expr.type->base != BK_Double){
-        SemanticError(op + " requires int/float/double, got: " + baseKindToStr(expr.type->base), lineno);
+    if (expr.type->base != BK_Int && expr.type->base != BK_Float){
+        SemanticError(op + " requires int/float, got: " + baseKindToStr(expr.type->base), lineno);
         return;
     }
 }
@@ -402,47 +343,6 @@ void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno) {
 
     if (to.type->base != BK_Int || !to.type->isScalar())
         SemanticError("foreach range end must be const int scalar", lineno);
-}
-
-/*───────── check array index ─────────*/
-int extractArrayIndexOrZero(const ExprInfo& expr, int lineno) {
-    if (!expr.isValid) {
-        return 0;
-    }
-
-    if (expr.type->base != BK_Int) {
-        SemanticError("array index must be int", lineno);
-        return 0;
-    }
-
-    if (expr.isConst) {
-        if (expr.valueKind != VK_Int) {
-            SemanticError("array index must be int", lineno);
-            return 0;
-        }
-        return expr.getInt();
-    }
-    return 0;
-}
-
-/*───────── check array dimension ─────────*/
-int checkArrayDimExpr(const ExprInfo& expr, int lineno) {
-    if (!expr.isValid) {
-        return -1;
-    }
-
-    if (!expr.isConst || !expr.type->isScalar() || expr.type->base != BK_Int || expr.valueKind != VK_Int) {
-        SemanticError("array dimension must be const int scalar", lineno);
-        return -1;
-    }
-
-    int val = expr.getInt();
-    if (val <= 0){
-        SemanticError("array dimension must be positive", lineno);
-        return -1;
-    }
-
-    return val;
 }
 
 /*───────── check foreach index ─────────*/
@@ -557,13 +457,8 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
         return;
     }
 
-    if (target.type->isFunc()) {
-        SemanticError("cannot assign to function", lineno);
-        return;
-    }
-
-    if (target.type->isArray()) {
-        SemanticError("cannot assign to array", lineno);
+    if (!target.type->isScalar()) {
+        SemanticError("left operand must be scalar", lineno);
         return;
     }
 
@@ -576,9 +471,9 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
         SemanticError("cannot assign function to variable", lineno);
         return;
     }
-
-    if (value.type->isArray()) {
-        SemanticError("cannot assign array to variable", lineno);
+    
+    if(!value.type->isScalar()){
+        SemanticError("right operand must be scalar", lineno);
         return;
     }
 
@@ -593,13 +488,8 @@ void checkPrint(const ExprInfo& expr, int lineno) {
         return;
     }
 
-    if (expr.type->isFunc()) {
-        SemanticError("cannot print function", lineno);
-        return;
-    }
-
-    if (expr.type->isArray()) {
-        SemanticError("cannot print array", lineno);
+    if (!expr.type->isScalar()) {
+        SemanticError("print only supports scalar type", lineno);
         return;
     }
 
@@ -615,13 +505,8 @@ void checkRead(const ExprInfo& expr, int lineno) {
         return;
     }
 
-    if (expr.type->isFunc()) {
-        SemanticError("cannot read to function", lineno);
-        return;
-    }
-
-    if (expr.type->isArray()) {
-        SemanticError("cannot read to array", lineno);
+    if (!expr.type->isScalar()) {
+        SemanticError("read only supports scalar type", lineno);
         return;
     }
 
@@ -632,7 +517,7 @@ void checkRead(const ExprInfo& expr, int lineno) {
 }
 
 /*───────── check variable declaration ─────────*/
-void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& varInit, Type* type, int lineno){
+void tryDeclareVarable(SymbolTable& symTab, const VarInit& varInit, Type* type, int lineno){
     if (!varInit.isValid) {
         return;
     }
@@ -649,11 +534,7 @@ void tryDeclareVarable(SymbolTable& symTab, TypeArena& typePool, const VarInit& 
             SemanticWarning("implicit conversion from " + baseKindToStr(varInit.constType->base) + " to " + baseKindToStr(type->base), lineno);
         }
         s = Symbol(varInit.name, type, false);
-    } 
-    else if (!varInit.arrayDims.empty()) {
-        Type* arrType = typePool.makeArray(type, varInit.arrayDims);
-        s = Symbol(varInit.name, arrType, false);
-    } 
+    }
     else {
         s = Symbol(varInit.name, type, false);
     }
@@ -668,13 +549,8 @@ void tryDeclareConstant(SymbolTable& symTab, std::string& id, Type* type, const 
         return;
     }
 
-    if (value.type->isFunc()) {
-        SemanticError("cannot assign function to const", lineno);
-        return;
-    }
-
-    if (value.type->isArray()) {
-        SemanticError("cannot assign array to const", lineno);
+    if (!type->isScalar()) {
+        SemanticError("const type must be scalar", lineno);
         return;
     }
 

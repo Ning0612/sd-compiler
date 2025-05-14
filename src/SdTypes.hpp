@@ -7,7 +7,7 @@
 #include <cstddef>
 
 // Basic built-in types
-enum BaseKind { BK_Int, BK_Float, BK_Double, BK_Bool, BK_String, BK_Void };
+enum BaseKind { BK_Int, BK_Float, BK_Bool, BK_String, BK_Void };
 
 // Type compatibility and promotion utilities
 bool isConvertible(BaseKind a, BaseKind b);
@@ -25,7 +25,6 @@ struct Type {
 
     explicit Type(BaseKind b);
     bool isScalar() const;
-    bool isArray() const;
     bool isFunc() const;
 
     bool operator==(const Type& o) const;
@@ -45,7 +44,6 @@ class TypeArena {
 public:
     ~TypeArena();
     Type* make(BaseKind kind);
-    Type* makeArray(Type* elem, const std::vector<int>& sizes);
     Type* makeFunc(Type* ret, const std::vector<Type*>& params);
 
 private:
