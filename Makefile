@@ -35,10 +35,10 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # ────────────── Parser & Scanner ───────
-$(SRC_DIR)/y.tab.cpp $(SRC_DIR)/y.tab.hpp: $(SRC_DIR)/p2_parser.y
+$(SRC_DIR)/y.tab.cpp $(SRC_DIR)/y.tab.hpp: $(SRC_DIR)/p3_parser.y
 	$(YACC) $(YACCFLAGS) -o $(SRC_DIR)/y.tab.cpp $<
 
-$(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/p2_lex.l $(SRC_DIR)/y.tab.hpp
+$(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/p3_lex.l $(SRC_DIR)/y.tab.hpp
 	$(LEX) --outfile=$@ $<
 
 # ────────────── Conflict Check ──────────────
