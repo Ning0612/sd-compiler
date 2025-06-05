@@ -479,6 +479,8 @@ void checkAssignment(const ExprInfo& target, const ExprInfo& value, int lineno) 
 
     if (isConvertible(value.type->base, target.type->base)) {
         SemanticWarning("implicit conversion from " + baseKindToStr(value.type->base) + " to " + baseKindToStr(target.type->base), lineno); 
+    }else if(value.type->base != target.type->base){
+        SemanticError("assignment type mismatch " + baseKindToStr(target.type->base) + " = " + baseKindToStr(value.type->base), lineno);
     }
 }
 

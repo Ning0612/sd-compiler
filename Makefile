@@ -43,7 +43,7 @@ $(SRC_DIR)/lex.yy.cpp: $(SRC_DIR)/p2_lex.l $(SRC_DIR)/y.tab.hpp
 
 # ────────────── Conflict Check ──────────────
 checkconflict:
-	$(YACC) $(YACCFLAGS) -v -o $(SRC_DIR)/y.tab.cpp $(SRC_DIR)/p2_parser.y
+	$(YACC) $(YACCFLAGS) -v -o $(SRC_DIR)/y.tab.cpp $(SRC_DIR)/p3_parser.y
 	@echo "=== Conflicts Report ==="
 	@if grep -q 'conflict' y.output; then \
 		grep 'conflict' y.output; \

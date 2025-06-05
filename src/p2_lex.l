@@ -120,8 +120,7 @@ static char buf[MAX_LINE_LENGTH] = "";
     token(ID);
 }
 
-([0-9]+)?\.[0-9]+([eE][+-]?[0-9]+)? |
-[0-9]+\.[0-9]*([eE][+-]?[0-9]+)? {
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? {
     tokenReal(atof(yytext));
 }
 

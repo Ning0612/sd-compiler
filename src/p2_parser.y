@@ -59,7 +59,7 @@ void yyerror(const char* s){
 %token                LE GE EQ NEQ LT GT
 %token                PLUS MINUS MUL DIV MOD ASSIGN NOT
 %token                AND OR INC DEC
-%token                DOT COMMA COLON SEMICOLON
+%token                DOT COMMA COLON SEMICOLON 
 %token                LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
 
 %token BREAK CONTINUE SWITCH CASE DEFAULT EXTERN
@@ -76,6 +76,7 @@ void yyerror(const char* s){
 %left   PLUS MINUS              /* + - */
 %left   MUL DIV MOD             /* * / % */
 %right  INC DEC UPLUS UMINUS    /* ++ -- */
+%right  POSTINC POSTDEC         /* POST ++ -- */
 %right  ASSIGN                  /* =  */
 
 %start program // start symbol
@@ -300,6 +301,14 @@ simple_stmt
         ExprInfo expr = *$1; delete $1;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
+    | INC lvalue SEMICOLON {
+        ExprInfo expr = *$2; delete $2;
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+     }
+    | DEC lvalue SEMICOLON {
+        ExprInfo expr = *$2; delete $2;
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+    }
     | SEMICOLON
     ;
 
@@ -403,6 +412,14 @@ for_simple_item
         ExprInfo expr = *$1; delete $1;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
     }
+    | INC lvalue  {
+        ExprInfo expr = *$2; delete $2;
+        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+     }
+    | DEC lvalue  {
+        ExprInfo expr = *$2; delete $2;
+        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+     }
     ;
 
 assign_no_semi
@@ -576,7 +593,40 @@ expression
             $$ = unaryOpResult(false, expr, yylineno);
         }
     }
-
+    | INC expression %prec INC      {
+        ExprInfo expr = *$2; delete $2;
+        if(!expr.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = unaryOpResult(true, expr, yylineno);
+        }
+    }
+    | DEC expression %prec DEC      {
+        ExprInfo expr = *$2; delete $2;
+        if(!expr.isValid) {
+            $$ = makeInvalidExpr();
+        }
+        else{
+            $$ = unaryOpResult(false, expr, yylineno);
+        }
+    }
+    | expression INC %prec POSTINC {
+        ExprInfo expr = *$1; delete $1;
+        if (!expr.isValid) {
+            $$ = makeInvalidExpr();
+        } else {
+            $$ = unaryOpResult(true, expr, yylineno); // true 表示 ++
+        }
+    }
+    | expression DEC %prec POSTDEC {
+        ExprInfo expr = *$1; delete $1;
+        if (!expr.isValid) {
+            $$ = makeInvalidExpr();
+        } else {
+            $$ = unaryOpResult(false, expr, yylineno); // false 表示 --
+        }
+    }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {
             delete $2;
@@ -663,6 +713,9 @@ proc_call
         std::vector<ExprInfo> args = *$3; delete $3;
         if (symbol != nullptr){
             checkFuncCall(symbol, funcName, args, yylineno);
+            if (symbol->type->base != BK_Void) {
+                SemanticError("function " + funcName + " should get return value", yylineno);
+            }
         }else{
             SemanticError("undeclared function: " + funcName, yylineno);
         }

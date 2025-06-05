@@ -114,7 +114,9 @@ extern int yydebug;
     EXTERN = 315,                  /* EXTERN  */
     IFX = 316,                     /* IFX  */
     UPLUS = 317,                   /* UPLUS  */
-    UMINUS = 318                   /* UMINUS  */
+    UMINUS = 318,                  /* UMINUS  */
+    POSTINC = 319,                 /* POSTINC  */
+    POSTDEC = 320                  /* POSTDEC  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -184,6 +186,8 @@ extern int yydebug;
 #define IFX 316
 #define UPLUS 317
 #define UMINUS 318
+#define POSTINC 319
+#define POSTDEC 320
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -200,11 +204,10 @@ union YYSTYPE
     VarInit* var_init_;
     ExprInfo* expr_info;
 
-    std::vector<int>* int_list;
     std::vector<Symbol>* symbol_list;
     std::vector<ExprInfo>* expr_info_list;
 
-#line 208 "src/y.tab.hpp"
+#line 211 "src/y.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

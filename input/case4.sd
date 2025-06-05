@@ -1,0 +1,26 @@
+int add(int a, int b){
+    return a + b;
+}
+
+
+void main(){
+    int i;
+    foreach(i : 1. .10){
+        print i;
+    }
+    int c;
+    i++;
+    c = ++i;
+
+    c = add(3, 5);
+
+
+    /*
+    a = ++i;
+    a = i++;
+    if (true)
+        int a;
+    else
+        a = 3;
+    */
+}
