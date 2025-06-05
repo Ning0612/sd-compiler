@@ -14,6 +14,7 @@ bool isConvertible(BaseKind a, BaseKind b);
 bool isBaseCompatible(BaseKind a, BaseKind b);
 BaseKind promote(BaseKind b1, BaseKind b2);
 std::string baseKindToStr(BaseKind kind);
+std::string baseKindToJavaStr(BaseKind kind);
 
 // Type information structure
 struct Type {

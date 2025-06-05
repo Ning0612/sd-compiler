@@ -133,3 +133,14 @@ std::string baseKindToStr(BaseKind kind) {
         default:        return "unknown";
     }
 }
+
+std::string baseKindToJavaStr(BaseKind kind) {
+    switch (kind) {
+        case BK_Int:    return "int";
+        case BK_Float:  return "float";
+        case BK_Bool:   return "int";
+        case BK_String: return "string";
+        case BK_Void:   return "void";
+        default:        return "unknown";
+    }
+}

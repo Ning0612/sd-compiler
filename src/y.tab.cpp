@@ -67,7 +67,7 @@
 
 
 /* First part of user prologue.  */
-#line 1 "src/p2_parser.y"
+#line 1 "src/p3_parser.y"
 
 #include "SemanticAnalyzer.hpp"
 #include "Context.hpp"
@@ -75,6 +75,8 @@
 #include <cstdlib>
 #include <vector>
 #include <string> 
+#include <fstream>
+#include <filesystem>
 
 extern int  yylex();
 extern int  yylineno;
@@ -87,7 +89,7 @@ void yyerror(const char* s){
     std::exit(1);
 }
 
-#line 91 "src/y.tab.cpp"
+#line 93 "src/y.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -610,17 +612,17 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    89,    89,   109,   110,   115,   116,   117,   121,   122,
-     128,   137,   141,   145,   152,   153,   174,   174,   202,   202,
-     220,   223,   229,   234,   242,   250,   250,   258,   259,   263,
-     264,   268,   269,   273,   274,   275,   276,   277,   278,   283,
-     284,   288,   292,   296,   300,   304,   308,   312,   316,   327,
-     352,   356,   364,   368,   372,   376,   388,   389,   390,   394,
-     395,   399,   403,   407,   411,   415,   419,   426,   437,   445,
-     459,   468,   477,   486,   495,   504,   513,   522,   532,   541,
-     551,   560,   569,   578,   587,   596,   605,   614,   622,   630,
-     638,   646,   654,   666,   670,   674,   678,   687,   710,   726,
-     727,   731,   736,   745,   746,   747,   748
+       0,    91,    91,   111,   112,   117,   118,   119,   123,   124,
+     130,   139,   143,   182,   224,   225,   246,   246,   290,   290,
+     330,   333,   339,   344,   352,   360,   360,   368,   369,   373,
+     374,   378,   379,   383,   384,   385,   386,   387,   388,   393,
+     394,   440,   487,   494,   528,   562,   596,   630,   634,   647,
+     662,   666,   674,   678,   682,   686,   698,   699,   700,   704,
+     705,   750,   796,   802,   836,   870,   904,   941,   954,   981,
+     995,  1004,  1013,  1022,  1031,  1040,  1049,  1058,  1068,  1077,
+    1087,  1096,  1105,  1114,  1123,  1132,  1141,  1150,  1158,  1166,
+    1174,  1205,  1213,  1225,  1229,  1233,  1237,  1246,  1269,  1285,
+    1286,  1290,  1295,  1304,  1305,  1306,  1307
 };
 #endif
 
@@ -1391,7 +1393,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: global_decl_list  */
-#line 89 "src/p2_parser.y"
+#line 91 "src/p3_parser.y"
                        {
         Symbol* mainFunc = ctx->symTab.lookup("main");
         if (mainFunc == nullptr) {
@@ -1409,45 +1411,115 @@ yyreduce:
         ctx->symTab.leaveScope();
         printf("\n");
     }
-#line 1413 "src/y.tab.cpp"
+#line 1415 "src/y.tab.cpp"
     break;
 
   case 10: /* const_decl: CONST type_spec ID ASSIGN expression SEMICOLON  */
-#line 128 "src/p2_parser.y"
+#line 130 "src/p3_parser.y"
                                                    {
         std::string id = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
         ExprInfo value = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         tryDeclareConstant(ctx->symTab, id, (yyvsp[-4].type), value, yylineno);
     }
-#line 1423 "src/y.tab.cpp"
+#line 1425 "src/y.tab.cpp"
     break;
 
   case 12: /* var_init_list: var_init  */
-#line 141 "src/p2_parser.y"
+#line 143 "src/p3_parser.y"
               {
         VarInit varInit = *(yyvsp[0].var_init_); delete (yyvsp[0].var_init_);
         tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
+        
+        if (ctx->symTab.getCurrentScopeIndex() == 0) {
+            std::string declaration = "    field static ";
+            switch (ctx->nowType->base) {
+                case BK_Int: declaration += "int " + varInit.name + " = " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""; break;
+                case BK_Float: declaration += "float " + varInit.name + " = " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"; break;
+                case BK_Bool: declaration += "int " + varInit.name + " = " + (varInit.iVal ? "1" : "0"); break;
+                default: SemanticError("unsupported type for static variable", yylineno); break;
+            }
+
+            ctx->fileContent.insert(ctx->fileContent.begin() + 2, declaration);
+        } else {
+            int index = ctx->symTab.lookup(varInit.name)->index;
+            switch (varInit.valueKind) {
+                case VK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                case VK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
+                case VK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                default:
+                    SemanticError("unsupported type for local variable", yylineno); break;
+            }
+
+            switch (ctx->nowType->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        istore " + std::to_string(index)); break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        fstore " + std::to_string(index)); break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        istore " + std::to_string(index)); break;
+                default:
+                    SemanticError("unsupported type for local variable", yylineno); break;
+            }
+        }
     }
-#line 1432 "src/y.tab.cpp"
+#line 1469 "src/y.tab.cpp"
     break;
 
   case 13: /* var_init_list: var_init_list COMMA var_init  */
-#line 145 "src/p2_parser.y"
+#line 182 "src/p3_parser.y"
                                    {
         VarInit varInit = *(yyvsp[0].var_init_); delete (yyvsp[0].var_init_);
         tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
+
+        if (ctx->symTab.getCurrentScopeIndex() == 0) {
+            std::string declaration = "    field static ";
+            switch (ctx->nowType->base) {
+                case BK_Int: declaration += "int " + varInit.name + " = " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""; break;
+                case BK_Float: declaration += "float " + varInit.name + " = " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"; break;
+                case BK_Bool: declaration += "int " + varInit.name + " = " + (varInit.iVal ? "1" : "0"); break;
+                default: SemanticError("unsupported type for static variable", yylineno); break;
+            }
+
+            ctx->fileContent.insert(ctx->fileContent.begin() + 2, declaration);
+        } else {
+            int index = ctx->symTab.lookup(varInit.name)->index;
+            switch (varInit.valueKind) {
+                case VK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                case VK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
+                case VK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                default:
+                    SemanticError("unsupported type for local variable", yylineno); break;
+            }
+
+            switch (ctx->nowType->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        istore " + std::to_string(index)); break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        fstore " + std::to_string(index)); break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        istore " + std::to_string(index)); break;
+                default:
+                    SemanticError("unsupported type for local variable", yylineno); break;
+            }
+        }
     }
-#line 1441 "src/y.tab.cpp"
+#line 1513 "src/y.tab.cpp"
     break;
 
   case 14: /* var_init: ID  */
-#line 152 "src/p2_parser.y"
-                             { (yyval.var_init_) = new VarInit(*(yyvsp[0].sval)); delete (yyvsp[0].sval); }
-#line 1447 "src/y.tab.cpp"
+#line 224 "src/p3_parser.y"
+                             { (yyval.var_init_) = new VarInit(*(yyvsp[0].sval), ctx->nowType); delete (yyvsp[0].sval); }
+#line 1519 "src/y.tab.cpp"
     break;
 
   case 15: /* var_init: ID ASSIGN expression  */
-#line 153 "src/p2_parser.y"
+#line 225 "src/p3_parser.y"
                              {
         std::string id = *(yyvsp[-2].sval); delete (yyvsp[-2].sval);
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
@@ -1462,27 +1534,41 @@ yyreduce:
             if (!expr.isConst) {
                 SemanticError("assignment from non-constant", yylineno);
             }
-            (yyval.var_init_) = new VarInit(id, expr.type);
+            (yyval.var_init_) = new VarInit(id, expr);
         }
     }
-#line 1469 "src/y.tab.cpp"
+#line 1541 "src/y.tab.cpp"
     break;
 
   case 16: /* $@1: %empty  */
-#line 174 "src/p2_parser.y"
+#line 246 "src/p3_parser.y"
                                                        {
         ctx->returnsExpr.clear();
+        ctx->funcType = (yyvsp[-5].type);
 
         std::string funcName = *(yyvsp[-4].sval); delete (yyvsp[-4].sval);
         std::vector<Symbol> paramList = *(yyvsp[-2].symbol_list); delete (yyvsp[-2].symbol_list);
 
+        std::string declaration = "    method public static " + baseKindToJavaStr((yyvsp[-5].type)->base) + " " + funcName + "(";
+        for (size_t i = 0; i < paramList.size(); ++i) {
+            if (i > 0) declaration += ", ";
+            declaration += "int";
+        }
+
+        declaration += ")";
+
+        ctx->fileContent.push_back(declaration);
+        ctx->fileContent.push_back("    max_stack 15");
+        ctx->fileContent.push_back("    max_locals 15");
+        ctx->fileContent.push_back("    {");
+
         declareFunction(funcName, (yyvsp[-5].type), paramList, ctx->typePool, ctx->symTab, yylineno);
     }
-#line 1482 "src/y.tab.cpp"
+#line 1568 "src/y.tab.cpp"
     break;
 
   case 17: /* func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE  */
-#line 181 "src/p2_parser.y"
+#line 267 "src/p3_parser.y"
                              {
         if (ctx->returnsExpr.empty()) {
             SemanticError("missing return statement", yylineno);
@@ -1502,245 +1588,469 @@ yyreduce:
             }
         }
 
+        ctx->fileContent.push_back("    }");
+        ctx->fileContent.push_back("");
         ctx->symTab.leaveScope();
     }
-#line 1508 "src/y.tab.cpp"
+#line 1596 "src/y.tab.cpp"
     break;
 
   case 18: /* $@2: %empty  */
-#line 202 "src/p2_parser.y"
+#line 290 "src/p3_parser.y"
                                                       {
         ctx->returnsExpr.clear();
 
         std::string funcName = *(yyvsp[-4].sval); delete (yyvsp[-4].sval);
         std::vector<Symbol> paramList = *(yyvsp[-2].symbol_list); delete (yyvsp[-2].symbol_list);
 
+        if (funcName == "main") {
+            ctx->fileContent.push_back("    method public static void main(java.lang.String[])");
+        }else {
+            std::string declaration = "    method public static void " + funcName + "(";
+
+            for (size_t i = 0; i < paramList.size(); ++i) {
+                if (i > 0) declaration += ", ";
+                declaration += "int";
+            }
+            declaration += ")";
+
+            ctx->fileContent.push_back(declaration);
+        }
+        
+        ctx->fileContent.push_back("    max_stack 15");
+        ctx->fileContent.push_back("    max_locals 15");
+        ctx->fileContent.push_back("    {");
+
         declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
     }
-#line 1521 "src/y.tab.cpp"
+#line 1627 "src/y.tab.cpp"
     break;
 
   case 19: /* func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE  */
-#line 209 "src/p2_parser.y"
+#line 315 "src/p3_parser.y"
                              {
         if (!ctx->returnsExpr.empty()) {
             SemanticError("void function should not return value", yylineno);
         }
 
         ctx->symTab.leaveScope();
+
+        ctx->fileContent.push_back("       return");
+        ctx->fileContent.push_back("    }");
+        ctx->fileContent.push_back("");
     }
-#line 1533 "src/y.tab.cpp"
+#line 1643 "src/y.tab.cpp"
     break;
 
   case 20: /* param_list_opt: %empty  */
-#line 220 "src/p2_parser.y"
+#line 330 "src/p3_parser.y"
                 {
         (yyval.symbol_list) = new std::vector<Symbol>();
     }
-#line 1541 "src/y.tab.cpp"
+#line 1651 "src/y.tab.cpp"
     break;
 
   case 21: /* param_list_opt: param_list  */
-#line 223 "src/p2_parser.y"
+#line 333 "src/p3_parser.y"
                  {
         (yyval.symbol_list) = (yyvsp[0].symbol_list);
     }
-#line 1549 "src/y.tab.cpp"
+#line 1659 "src/y.tab.cpp"
     break;
 
   case 22: /* param_list: param  */
-#line 229 "src/p2_parser.y"
+#line 339 "src/p3_parser.y"
             {
         (yyval.symbol_list) = new std::vector<Symbol>;
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1559 "src/y.tab.cpp"
+#line 1669 "src/y.tab.cpp"
     break;
 
   case 23: /* param_list: param_list COMMA param  */
-#line 234 "src/p2_parser.y"
+#line 344 "src/p3_parser.y"
                              {
         (yyval.symbol_list) = (yyvsp[-2].symbol_list);
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1569 "src/y.tab.cpp"
+#line 1679 "src/y.tab.cpp"
     break;
 
   case 24: /* param: type_spec ID  */
-#line 242 "src/p2_parser.y"
+#line 352 "src/p3_parser.y"
                    {
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         (yyval.symbol) = new Symbol(id, (yyvsp[-1].type), false);
     }
-#line 1578 "src/y.tab.cpp"
+#line 1688 "src/y.tab.cpp"
     break;
 
   case 25: /* $@3: %empty  */
-#line 250 "src/p2_parser.y"
+#line 360 "src/p3_parser.y"
              {
         ctx->symTab.enterScope();
     }
-#line 1586 "src/y.tab.cpp"
+#line 1696 "src/y.tab.cpp"
     break;
 
   case 26: /* block: LBRACE $@3 block_items_opt RBRACE  */
-#line 252 "src/p2_parser.y"
+#line 362 "src/p3_parser.y"
                              {
         ctx->symTab.leaveScope();
     }
-#line 1594 "src/y.tab.cpp"
+#line 1704 "src/y.tab.cpp"
     break;
 
   case 40: /* simple_stmt: PRINT expression SEMICOLON  */
-#line 284 "src/p2_parser.y"
+#line 394 "src/p3_parser.y"
                                  {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+
+        if (expr.isConst) {
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for print", yylineno);
+            }
+        } else {
+            ctx->fileContent.push_back("        swap");
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for print", yylineno);
+            }
+        }
     }
-#line 1603 "src/y.tab.cpp"
+#line 1755 "src/y.tab.cpp"
     break;
 
   case 41: /* simple_stmt: PRINTLN expression SEMICOLON  */
-#line 288 "src/p2_parser.y"
+#line 440 "src/p3_parser.y"
                                    {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
+
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        if (expr.isConst) {
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for println", yylineno);
+            }
+        } else {
+            ctx->fileContent.push_back("        swap");
+
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for println", yylineno);
+            }
+        }
     }
-#line 1612 "src/y.tab.cpp"
+#line 1807 "src/y.tab.cpp"
     break;
 
   case 42: /* simple_stmt: READ lvalue SEMICOLON  */
-#line 292 "src/p2_parser.y"
+#line 487 "src/p3_parser.y"
                             {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        Symbol* sym = (yyvsp[-1].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkRead(expr, yylineno);
+        SemanticError("read statement not supported in code generation", yylineno);
     }
-#line 1621 "src/y.tab.cpp"
+#line 1819 "src/y.tab.cpp"
     break;
 
   case 43: /* simple_stmt: lvalue INC SEMICOLON  */
-#line 296 "src/p2_parser.y"
+#line 494 "src/p3_parser.y"
                            {
-        ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
+        Symbol* sym = (yyvsp[-2].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;        
         if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
      }
-#line 1630 "src/y.tab.cpp"
+#line 1858 "src/y.tab.cpp"
     break;
 
   case 44: /* simple_stmt: lvalue DEC SEMICOLON  */
-#line 300 "src/p2_parser.y"
+#line 528 "src/p3_parser.y"
                            {
-        ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
+        Symbol* sym = (yyvsp[-2].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
     }
-#line 1639 "src/y.tab.cpp"
+#line 1897 "src/y.tab.cpp"
     break;
 
   case 45: /* simple_stmt: INC lvalue SEMICOLON  */
-#line 304 "src/p2_parser.y"
+#line 562 "src/p3_parser.y"
                            {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        Symbol* sym = (yyvsp[-1].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
      }
-#line 1648 "src/y.tab.cpp"
+#line 1936 "src/y.tab.cpp"
     break;
 
   case 46: /* simple_stmt: DEC lvalue SEMICOLON  */
-#line 308 "src/p2_parser.y"
+#line 596 "src/p3_parser.y"
                            {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        Symbol* sym = (yyvsp[-1].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
     }
-#line 1657 "src/y.tab.cpp"
+#line 1975 "src/y.tab.cpp"
     break;
 
   case 48: /* assign_stmt: lvalue ASSIGN expression SEMICOLON  */
-#line 316 "src/p2_parser.y"
+#line 634 "src/p3_parser.y"
                                          {
-        ExprInfo target = *(yyvsp[-3].expr_info); delete (yyvsp[-3].expr_info);
+        Symbol* sym = (yyvsp[-3].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo target = *exprPtr; delete exprPtr;
         ExprInfo value = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
         }
     }
-#line 1669 "src/y.tab.cpp"
+#line 1989 "src/y.tab.cpp"
     break;
 
   case 49: /* lvalue: ID  */
-#line 327 "src/p2_parser.y"
+#line 647 "src/p3_parser.y"
          {
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         Symbol* symbol = ctx->symTab.lookup(id);
 
         if (symbol == nullptr) {
             SemanticError("undeclared identifier: " + id, yylineno);
-            (yyval.expr_info) = makeInvalidExpr();
+            (yyval.symbol) = nullptr;
         } else {
-            (yyval.expr_info) = new ExprInfo(symbol->type, symbol->isConst);
-
-            if (symbol->hasConstValue()) {
-                switch (symbol->type->base) {
-                    case BK_Int:   (yyval.expr_info)->setInt(symbol->iVal); break;
-                    case BK_Float: (yyval.expr_info)->setFloat(symbol->fVal); break;
-                    case BK_Bool:  (yyval.expr_info)->setBool(symbol->bVal); break;
-                    case BK_String: (yyval.expr_info)->setString(symbol->sVal); break;
-                    default: break;
-                }
-            }
+            (yyval.symbol) = symbol;
         }
     }
-#line 1695 "src/y.tab.cpp"
+#line 2005 "src/y.tab.cpp"
     break;
 
   case 50: /* if_stmt: IF LPAREN expression RPAREN statement  */
-#line 352 "src/p2_parser.y"
+#line 662 "src/p3_parser.y"
                                                       {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 1704 "src/y.tab.cpp"
+#line 2014 "src/y.tab.cpp"
     break;
 
   case 51: /* if_stmt: IF LPAREN expression RPAREN statement ELSE statement  */
-#line 356 "src/p2_parser.y"
+#line 666 "src/p3_parser.y"
                                                            {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
         if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 1713 "src/y.tab.cpp"
+#line 2023 "src/y.tab.cpp"
     break;
 
   case 52: /* loop_stmt: WHILE LPAREN expression RPAREN statement  */
-#line 364 "src/p2_parser.y"
+#line 674 "src/p3_parser.y"
                                               { 
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
     }
-#line 1722 "src/y.tab.cpp"
+#line 2032 "src/y.tab.cpp"
     break;
 
   case 53: /* loop_stmt: DO statement WHILE LPAREN expression RPAREN SEMICOLON  */
-#line 368 "src/p2_parser.y"
+#line 678 "src/p3_parser.y"
                                                             {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
     }
-#line 1731 "src/y.tab.cpp"
+#line 2041 "src/y.tab.cpp"
     break;
 
   case 54: /* loop_stmt: FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement  */
-#line 372 "src/p2_parser.y"
+#line 682 "src/p3_parser.y"
                                                                                               {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
         if (expr.isValid) checkBoolExpr("for", expr, yylineno);
     }
-#line 1740 "src/y.tab.cpp"
+#line 2050 "src/y.tab.cpp"
     break;
 
   case 55: /* loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement  */
-#line 376 "src/p2_parser.y"
+#line 686 "src/p3_parser.y"
                                                                             {
         ExprInfo from = *(yyvsp[-5].expr_info); ExprInfo to = *(yyvsp[-2].expr_info); delete (yyvsp[-5].expr_info); delete (yyvsp[-2].expr_info);
         std::string id = *(yyvsp[-7].sval); delete (yyvsp[-7].sval);
@@ -1749,95 +2059,321 @@ yyreduce:
         }
         checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
-#line 1753 "src/y.tab.cpp"
+#line 2063 "src/y.tab.cpp"
     break;
 
   case 60: /* for_simple_item: PRINT expression  */
-#line 395 "src/p2_parser.y"
+#line 705 "src/p3_parser.y"
                          {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
+
+        if (expr.isConst) {
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for print", yylineno);
+            }
+        } else {
+            ctx->fileContent.push_back("        swap");
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for print", yylineno);
+            }
+        }
     }
-#line 1762 "src/y.tab.cpp"
+#line 2113 "src/y.tab.cpp"
     break;
 
   case 61: /* for_simple_item: PRINTLN expression  */
-#line 399 "src/p2_parser.y"
+#line 750 "src/p3_parser.y"
                           {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
+
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        if (expr.isConst) {
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for println", yylineno);
+            }
+        } else {
+            ctx->fileContent.push_back("        swap");
+            switch (expr.type->base) {
+                case BK_Int:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
+                    break;
+                case BK_Bool:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
+                    break;
+                default:
+                    SemanticError("unsupported type for println", yylineno);
+            }
+        }
     }
-#line 1771 "src/y.tab.cpp"
+#line 2164 "src/y.tab.cpp"
     break;
 
   case 62: /* for_simple_item: READ lvalue  */
-#line 403 "src/p2_parser.y"
+#line 796 "src/p3_parser.y"
                    {
-        ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
+        Symbol* sym = (yyvsp[0].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkRead(expr, yylineno);
     }
-#line 1780 "src/y.tab.cpp"
+#line 2175 "src/y.tab.cpp"
     break;
 
   case 63: /* for_simple_item: lvalue INC  */
-#line 407 "src/p2_parser.y"
+#line 802 "src/p3_parser.y"
                   {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        Symbol* sym = (yyvsp[-1].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
      }
-#line 1789 "src/y.tab.cpp"
+#line 2214 "src/y.tab.cpp"
     break;
 
   case 64: /* for_simple_item: lvalue DEC  */
-#line 411 "src/p2_parser.y"
+#line 836 "src/p3_parser.y"
                   {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        Symbol* sym = (yyvsp[-1].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
     }
-#line 1798 "src/y.tab.cpp"
+#line 2253 "src/y.tab.cpp"
     break;
 
   case 65: /* for_simple_item: INC lvalue  */
-#line 415 "src/p2_parser.y"
+#line 870 "src/p3_parser.y"
                   {
-        ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
+        Symbol* sym = (yyvsp[0].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        iadd");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fadd");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
      }
-#line 1807 "src/y.tab.cpp"
+#line 2292 "src/y.tab.cpp"
     break;
 
   case 66: /* for_simple_item: DEC lvalue  */
-#line 419 "src/p2_parser.y"
+#line 904 "src/p3_parser.y"
                   {
-        ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
+        Symbol* sym = (yyvsp[0].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
+        if (sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        putstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        putstatic float " + sym->name);
+                }
+            }
+            else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        sipush 1");
+                    ctx->fileContent.push_back("        isub");
+                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    ctx->fileContent.push_back("        ldc 1.0f");
+                    ctx->fileContent.push_back("        fsub");
+                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                }
+            }
+        }
      }
-#line 1816 "src/y.tab.cpp"
+#line 2331 "src/y.tab.cpp"
     break;
 
   case 67: /* assign_no_semi: lvalue ASSIGN expression  */
-#line 426 "src/p2_parser.y"
+#line 941 "src/p3_parser.y"
                                {
-        ExprInfo target = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
+        Symbol* sym = (yyvsp[-2].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        ExprInfo target = *exprPtr; delete exprPtr;
         ExprInfo value = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
         }
     }
-#line 1828 "src/y.tab.cpp"
+#line 2345 "src/y.tab.cpp"
     break;
 
   case 68: /* return_stmt: RETURN expression SEMICOLON  */
-#line 437 "src/p2_parser.y"
+#line 954 "src/p3_parser.y"
                                   {
-        ctx->returnsExpr.push_back(std::make_pair(*(yyvsp[-1].expr_info), yylineno));
-        delete (yyvsp[-1].expr_info);
-     }
-#line 1837 "src/y.tab.cpp"
+        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
+        ctx->returnsExpr.push_back(std::make_pair(expr, yylineno));
+
+        if (expr.isConst) {
+            switch (ctx->funcType->base) {
+            case BK_Int:
+                ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                ctx->fileContent.push_back("        ireturn");
+                break;
+            case BK_Float:
+                ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
+                ctx->fileContent.push_back("        freturn");
+                break;
+            case BK_Bool:
+                ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                ctx->fileContent.push_back("        ireturn");
+                break;
+            default:
+                SemanticError("unsupported return type", yylineno);
+            }
+        }
+    }
+#line 2373 "src/y.tab.cpp"
     break;
 
   case 69: /* expression: expression PLUS expression  */
-#line 445 "src/p2_parser.y"
+#line 981 "src/p3_parser.y"
                                  {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1852,11 +2388,11 @@ yyreduce:
             }
         }
     }
-#line 1856 "src/y.tab.cpp"
+#line 2392 "src/y.tab.cpp"
     break;
 
   case 70: /* expression: expression MINUS expression  */
-#line 459 "src/p2_parser.y"
+#line 995 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1866,11 +2402,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1870 "src/y.tab.cpp"
+#line 2406 "src/y.tab.cpp"
     break;
 
   case 71: /* expression: expression MUL expression  */
-#line 468 "src/p2_parser.y"
+#line 1004 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1880,11 +2416,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1884 "src/y.tab.cpp"
+#line 2420 "src/y.tab.cpp"
     break;
 
   case 72: /* expression: expression DIV expression  */
-#line 477 "src/p2_parser.y"
+#line 1013 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1894,11 +2430,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1898 "src/y.tab.cpp"
+#line 2434 "src/y.tab.cpp"
     break;
 
   case 73: /* expression: expression MOD expression  */
-#line 486 "src/p2_parser.y"
+#line 1022 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1908,11 +2444,11 @@ yyreduce:
             (yyval.expr_info) = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1912 "src/y.tab.cpp"
+#line 2448 "src/y.tab.cpp"
     break;
 
   case 74: /* expression: expression LT expression  */
-#line 495 "src/p2_parser.y"
+#line 1031 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1922,11 +2458,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1926 "src/y.tab.cpp"
+#line 2462 "src/y.tab.cpp"
     break;
 
   case 75: /* expression: expression LE expression  */
-#line 504 "src/p2_parser.y"
+#line 1040 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1936,11 +2472,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1940 "src/y.tab.cpp"
+#line 2476 "src/y.tab.cpp"
     break;
 
   case 76: /* expression: expression GT expression  */
-#line 513 "src/p2_parser.y"
+#line 1049 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1950,11 +2486,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1954 "src/y.tab.cpp"
+#line 2490 "src/y.tab.cpp"
     break;
 
   case 77: /* expression: expression GE expression  */
-#line 522 "src/p2_parser.y"
+#line 1058 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1964,11 +2500,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 1968 "src/y.tab.cpp"
+#line 2504 "src/y.tab.cpp"
     break;
 
   case 78: /* expression: expression EQ expression  */
-#line 532 "src/p2_parser.y"
+#line 1068 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1978,11 +2514,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1982 "src/y.tab.cpp"
+#line 2518 "src/y.tab.cpp"
     break;
 
   case 79: /* expression: expression NEQ expression  */
-#line 541 "src/p2_parser.y"
+#line 1077 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -1992,11 +2528,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 1996 "src/y.tab.cpp"
+#line 2532 "src/y.tab.cpp"
     break;
 
   case 80: /* expression: expression AND expression  */
-#line 551 "src/p2_parser.y"
+#line 1087 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2006,11 +2542,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
         }   
     }
-#line 2010 "src/y.tab.cpp"
+#line 2546 "src/y.tab.cpp"
     break;
 
   case 81: /* expression: expression OR expression  */
-#line 560 "src/p2_parser.y"
+#line 1096 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2020,11 +2556,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2024 "src/y.tab.cpp"
+#line 2560 "src/y.tab.cpp"
     break;
 
   case 82: /* expression: NOT expression  */
-#line 569 "src/p2_parser.y"
+#line 1105 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2034,11 +2570,11 @@ yyreduce:
             (yyval.expr_info) = notOpResult(expr, ctx->typePool, yylineno);
         }
     }
-#line 2038 "src/y.tab.cpp"
+#line 2574 "src/y.tab.cpp"
     break;
 
   case 83: /* expression: MINUS expression  */
-#line 578 "src/p2_parser.y"
+#line 1114 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2048,11 +2584,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(true, expr, yylineno);
         }
     }
-#line 2052 "src/y.tab.cpp"
+#line 2588 "src/y.tab.cpp"
     break;
 
   case 84: /* expression: PLUS expression  */
-#line 587 "src/p2_parser.y"
+#line 1123 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2062,11 +2598,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(false, expr, yylineno);
         }
     }
-#line 2066 "src/y.tab.cpp"
+#line 2602 "src/y.tab.cpp"
     break;
 
   case 85: /* expression: INC expression  */
-#line 596 "src/p2_parser.y"
+#line 1132 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2076,11 +2612,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(true, expr, yylineno);
         }
     }
-#line 2080 "src/y.tab.cpp"
+#line 2616 "src/y.tab.cpp"
     break;
 
   case 86: /* expression: DEC expression  */
-#line 605 "src/p2_parser.y"
+#line 1141 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2090,11 +2626,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(false, expr, yylineno);
         }
     }
-#line 2094 "src/y.tab.cpp"
+#line 2630 "src/y.tab.cpp"
     break;
 
   case 87: /* expression: expression INC  */
-#line 614 "src/p2_parser.y"
+#line 1150 "src/p3_parser.y"
                                    {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (!expr.isValid) {
@@ -2103,11 +2639,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(true, expr, yylineno); // true 表示 ++
         }
     }
-#line 2107 "src/y.tab.cpp"
+#line 2643 "src/y.tab.cpp"
     break;
 
   case 88: /* expression: expression DEC  */
-#line 622 "src/p2_parser.y"
+#line 1158 "src/p3_parser.y"
                                    {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (!expr.isValid) {
@@ -2116,11 +2652,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(false, expr, yylineno); // false 表示 --
         }
     }
-#line 2120 "src/y.tab.cpp"
+#line 2656 "src/y.tab.cpp"
     break;
 
   case 89: /* expression: LPAREN expression RPAREN  */
-#line 630 "src/p2_parser.y"
+#line 1166 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[-1].expr_info)->isValid) {
             delete (yyvsp[-1].expr_info);
@@ -2129,24 +2665,47 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[-1].expr_info);
         }
     }
-#line 2133 "src/y.tab.cpp"
+#line 2669 "src/y.tab.cpp"
     break;
 
   case 90: /* expression: lvalue  */
-#line 638 "src/p2_parser.y"
-                                     { 
-        if (!(yyvsp[0].expr_info)->isValid) {
-            delete (yyvsp[0].expr_info);
+#line 1174 "src/p3_parser.y"
+                                     {
+        Symbol* sym = (yyvsp[0].symbol);
+        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
+        
+        if (!exprPtr->isValid) {
+            delete exprPtr;
             (yyval.expr_info) = makeInvalidExpr();
         }else{
-            (yyval.expr_info) = (yyvsp[0].expr_info);
+            (yyval.expr_info) = exprPtr;
+        }
+
+        if(sym != nullptr) {
+            if (sym->index == -1) {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        getstatic float " + sym->name);
+                } else if (sym->type->base == BK_Bool) {
+                    ctx->fileContent.push_back("        getstatic int " + sym->name);
+                }
+            } else {
+                if (sym->type->base == BK_Int) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Float) {
+                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                } else if (sym->type->base == BK_Bool) {
+                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                }
+            }
         }
     }
-#line 2146 "src/y.tab.cpp"
+#line 2705 "src/y.tab.cpp"
     break;
 
   case 91: /* expression: const_lit  */
-#line 646 "src/p2_parser.y"
+#line 1205 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2155,11 +2714,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2159 "src/y.tab.cpp"
+#line 2718 "src/y.tab.cpp"
     break;
 
   case 92: /* expression: func_call  */
-#line 654 "src/p2_parser.y"
+#line 1213 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2168,48 +2727,48 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2172 "src/y.tab.cpp"
+#line 2731 "src/y.tab.cpp"
     break;
 
   case 93: /* const_lit: INT_LIT  */
-#line 666 "src/p2_parser.y"
+#line 1225 "src/p3_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Int), true);
         (yyval.expr_info)->setInt((yyvsp[0].ival));
     }
-#line 2181 "src/y.tab.cpp"
+#line 2740 "src/y.tab.cpp"
     break;
 
   case 94: /* const_lit: REAL_LIT  */
-#line 670 "src/p2_parser.y"
+#line 1229 "src/p3_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Float), true);
         (yyval.expr_info)->setFloat((yyvsp[0].fval));
     }
-#line 2190 "src/y.tab.cpp"
+#line 2749 "src/y.tab.cpp"
     break;
 
   case 95: /* const_lit: BOOL_LIT  */
-#line 674 "src/p2_parser.y"
+#line 1233 "src/p3_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Bool), true);
         (yyval.expr_info)->setBool((yyvsp[0].bval));
     }
-#line 2199 "src/y.tab.cpp"
+#line 2758 "src/y.tab.cpp"
     break;
 
   case 96: /* const_lit: STRING_LIT  */
-#line 678 "src/p2_parser.y"
+#line 1237 "src/p3_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_String), true);
         (yyval.expr_info)->setString(*(yyvsp[0].sval));
         delete (yyvsp[0].sval);
     }
-#line 2209 "src/y.tab.cpp"
+#line 2768 "src/y.tab.cpp"
     break;
 
   case 97: /* func_call: ID LPAREN arg_list_opt RPAREN  */
-#line 687 "src/p2_parser.y"
+#line 1246 "src/p3_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2231,11 +2790,11 @@ yyreduce:
             (yyval.expr_info) = makeInvalidExpr();
         }
     }
-#line 2235 "src/y.tab.cpp"
+#line 2794 "src/y.tab.cpp"
     break;
 
   case 98: /* proc_call: ID LPAREN arg_list_opt RPAREN  */
-#line 710 "src/p2_parser.y"
+#line 1269 "src/p3_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2249,67 +2808,67 @@ yyreduce:
             SemanticError("undeclared function: " + funcName, yylineno);
         }
     }
-#line 2253 "src/y.tab.cpp"
+#line 2812 "src/y.tab.cpp"
     break;
 
   case 99: /* arg_list_opt: %empty  */
-#line 726 "src/p2_parser.y"
+#line 1285 "src/p3_parser.y"
                  { (yyval.expr_info_list) = new std::vector<ExprInfo>();}
-#line 2259 "src/y.tab.cpp"
+#line 2818 "src/y.tab.cpp"
     break;
 
   case 100: /* arg_list_opt: arg_list  */
-#line 727 "src/p2_parser.y"
+#line 1286 "src/p3_parser.y"
                { (yyval.expr_info_list) = (yyvsp[0].expr_info_list); }
-#line 2265 "src/y.tab.cpp"
+#line 2824 "src/y.tab.cpp"
     break;
 
   case 101: /* arg_list: expression  */
-#line 731 "src/p2_parser.y"
+#line 1290 "src/p3_parser.y"
                  {
         (yyval.expr_info_list) = new std::vector<ExprInfo>();
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2275 "src/y.tab.cpp"
+#line 2834 "src/y.tab.cpp"
     break;
 
   case 102: /* arg_list: arg_list COMMA expression  */
-#line 736 "src/p2_parser.y"
+#line 1295 "src/p3_parser.y"
                                {
         (yyval.expr_info_list) = (yyvsp[-2].expr_info_list);
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2285 "src/y.tab.cpp"
+#line 2844 "src/y.tab.cpp"
     break;
 
   case 103: /* type_spec: INT_TOK  */
-#line 745 "src/p2_parser.y"
+#line 1304 "src/p3_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_Int); ctx->nowType = (yyval.type); }
-#line 2291 "src/y.tab.cpp"
+#line 2850 "src/y.tab.cpp"
     break;
 
   case 104: /* type_spec: FLOAT_TOK  */
-#line 746 "src/p2_parser.y"
+#line 1305 "src/p3_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Float); ctx->nowType = (yyval.type); }
-#line 2297 "src/y.tab.cpp"
+#line 2856 "src/y.tab.cpp"
     break;
 
   case 105: /* type_spec: BOOL_TOK  */
-#line 747 "src/p2_parser.y"
+#line 1306 "src/p3_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Bool);  ctx->nowType = (yyval.type); }
-#line 2303 "src/y.tab.cpp"
+#line 2862 "src/y.tab.cpp"
     break;
 
   case 106: /* type_spec: STRING_TOK  */
-#line 748 "src/p2_parser.y"
+#line 1307 "src/p3_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_String); ctx->nowType = (yyval.type);}
-#line 2309 "src/y.tab.cpp"
+#line 2868 "src/y.tab.cpp"
     break;
 
 
-#line 2313 "src/y.tab.cpp"
+#line 2872 "src/y.tab.cpp"
 
       default: break;
     }
@@ -2502,7 +3061,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 751 "src/p2_parser.y"
+#line 1310 "src/p3_parser.y"
  
 
 int main(int argc, char* argv[]) {
@@ -2518,19 +3077,42 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::filesystem::path p(argv[1]);
+    std::string fileName = p.stem().string() + ".j";
+    std::string baseName = p.stem().string();
+
     // Initialize semantic analysis context
     Context context;
     ctx = &context;
 
-    // Start parsing with error handling for semantic errors
+    ctx->fileContent.push_back("class " + baseName);
+    ctx->fileContent.push_back("{");
     int result = yyparse();
+    ctx->fileContent.push_back("}");
+
+    std::ofstream outputFile(fileName);
+    if (!outputFile.is_open()) {
+        std::cerr << "Error opening output file." << std::endl;
+        return 1;
+    }
+
+    for (const auto& line : ctx->fileContent) {
+        outputFile << line << "\n";
+    }
+
+    outputFile.close();
+
     if (SemanticWarning::hasWarning()) {
         SemanticWarning::printAllWarning();
     }
     
     if (SemanticError::hasError()) {
         SemanticError::printAllError();
-        return 2;
+        result += 2;
+    }
+
+    if (SemanticError::hasError() || result != 0) {
+        std::filesystem::remove(fileName.c_str()); // Remove the output file if there are errors
     }
 
     return result;

@@ -3,8 +3,8 @@
 
 /* ───────────── Symbol Methods ───────────── */
 
-Symbol::Symbol(const std::string& n, Type* t, bool c)
-    : name(n), type(t), isConst(c) {}
+Symbol::Symbol(const std::string& n, Type* t, bool c, int idx)
+    : name(n), type(t), isConst(c), index(idx) {}
 
 void Symbol::setInt(int v) { valueKind = VK_Int; iVal = v; }
 void Symbol::setFloat(float v) { valueKind = VK_Float; fVal = v; }
@@ -43,8 +43,13 @@ void Symbol::setConstValueFromExpr(const ExprInfo* e) {
     }
 }
 
+void Symbol::setExprInfo(ExprInfo* expr) {
+
+    delete expr; // Avoid memory leak if not used
+}
+
 // Get the expression information for the symbol
-ExprInfo* Symbol::getExpr() const {
+ExprInfo* Symbol::getExprInfo() const {
     ExprInfo* e = new ExprInfo(type);
     if (!hasConstValue()) return e;
 
@@ -69,6 +74,11 @@ ExprInfo* Symbol::getExpr() const {
 void Symbol::dbgPrint() const {
     printf("ID: %s, Type: ", name.c_str());
     type->dbgPrint();
+
+    // Print index for non-constant symbols
+    if (!isConst && index >= 0) {
+        printf(", Index: %d", index);
+    }
 
     if (isConst) {
         printf(", Const");

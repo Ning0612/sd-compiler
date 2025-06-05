@@ -68,6 +68,19 @@ endif
 	@echo "=== Running $(TEST) ==="
 	$(TARGET) $(TEST)
 
+# ────────────── Compile .sd to .j, then Run Java ──────────────
+test-java: $(TARGET)
+ifndef TEST
+	$(error Please specify TEST=path/to/file.sd (without extension))
+endif
+	@echo "=== Compiling $(TEST).sd to $(TEST).j ==="
+	$(TARGET) $(TEST)
+	@echo "=== Assembling $(basename $(notdir $(TEST))).j to .class ==="
+	./javaaPortable/javaa $(basename $(notdir $(TEST))).j
+	@echo "=== Running Java class $(notdir $(basename $(TEST))) ==="
+	java -cp . $(notdir $(basename $(TEST)))
+
+
 # ────────────── Clean ──────────────────
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR) $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/y.tab.*

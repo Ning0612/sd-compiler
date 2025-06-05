@@ -14,6 +14,7 @@ public:
     std::string name;      // symbol name
     Type* type;            // symbol type
     bool isConst;          // whether the symbol is constant
+    int index;             // symbol index (-1 for constants or global scope)
 
     ValueKind valueKind = VK_None;  // constant value kind
     union {
@@ -23,7 +24,7 @@ public:
     };
     std::string sVal; // string constants
 
-    Symbol(const std::string& n, Type* t, bool c);
+    Symbol(const std::string& n, Type* t, bool c, int idx = -1);
 
     void setInt(int v);
     void setFloat(float v);
@@ -31,7 +32,8 @@ public:
     void setString(const std::string& s);
     bool hasConstValue() const;
     void setConstValueFromExpr(const ExprInfo* e);
-
-    ExprInfo* getExpr() const;
+    
+    void setExprInfo(ExprInfo* expr);
+    ExprInfo* getExprInfo() const;
     void dbgPrint() const;
 };
