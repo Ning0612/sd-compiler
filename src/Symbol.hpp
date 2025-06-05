@@ -33,7 +33,6 @@ public:
     bool hasConstValue() const;
     void setConstValueFromExpr(const ExprInfo* e);
     
-    void setExprInfo(ExprInfo* expr);
     ExprInfo* getExprInfo() const;
     void dbgPrint() const;
 };

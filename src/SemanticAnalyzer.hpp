@@ -6,6 +6,7 @@
 #include "SymbolTable.hpp"
 #include "ExprInfo.hpp"
 #include "SdTypes.hpp"
+#include "Context.hpp"
 
 /* ─────────────── Value Extraction ─────────────── */
 
@@ -35,7 +36,7 @@ std::string relOpToStr(RelOp op); // Return string form of relational op
 ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
 
 // Evaluate numeric binary operations (e.g., +, -, *, /)
-ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
+ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno);
 
 // Evaluate relational binary operations (e.g., <, >=)
 ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
@@ -52,13 +53,13 @@ ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno);
 // Evaluate unary + or - (sign operator)
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno);
 
+// Validate ++ or -- target is modifiable and not const
+ExprInfo * checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno);
+
 /* ─────────────── Semantic Checks ─────────────── */
 
 // Ensure an expression is boolean in a given context (if, while, etc.)
 void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno);
-
-// Validate ++ or -- target is modifiable and not const
-void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno);
 
 // Validate foreach range (start..end)
 void checkForeachRange(const ExprInfo& from, const ExprInfo& to, int lineno);

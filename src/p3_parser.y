@@ -158,11 +158,11 @@ var_init_list
             int index = ctx->symTab.lookup(varInit.name)->index;
             switch (varInit.valueKind) {
                 case VK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
                 case VK_Float:
                     ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
                 case VK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
                 default:
                     SemanticError("unsupported type for local variable", yylineno); break;
             }
@@ -197,11 +197,11 @@ var_init_list
             int index = ctx->symTab.lookup(varInit.name)->index;
             switch (varInit.valueKind) {
                 case VK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
                 case VK_Float:
                     ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
                 case VK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
                 default:
                     SemanticError("unsupported type for local variable", yylineno); break;
             }
@@ -399,7 +399,7 @@ simple_stmt
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
                     break;
                 case BK_Float:
@@ -407,7 +407,7 @@ simple_stmt
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
                     break;
                 case BK_String:
@@ -445,7 +445,7 @@ simple_stmt
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
                     break;
                 case BK_Float:
@@ -453,7 +453,7 @@ simple_stmt
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
                     break;
                 case BK_String:
@@ -492,140 +492,16 @@ simple_stmt
         SemanticError("read statement not supported in code generation", yylineno);
     }
     | lvalue INC SEMICOLON {
-        Symbol* sym = $1;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;        
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ($1 != nullptr) delete checkIncDecValid(true, $1, ctx, yylineno);
      }
     | lvalue DEC SEMICOLON {
-        Symbol* sym = $1;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-    }
+        if ($1 != nullptr) delete checkIncDecValid(false, $1, ctx, yylineno);
+     }
     | INC lvalue SEMICOLON {
-        Symbol* sym = $2;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ($2 != nullptr) delete checkIncDecValid(true, $2, ctx, yylineno);
      }
     | DEC lvalue SEMICOLON {
-        Symbol* sym = $2;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ($2 != nullptr) delete checkIncDecValid(false, $2, ctx, yylineno);
     }
     | SEMICOLON
     ;
@@ -638,6 +514,31 @@ assign_stmt
         ExprInfo value = *$3; delete $3;
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
+            if (value.isConst) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(value.iVal)); break;
+                    case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
+                    case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
+                    case BK_String: ctx->fileContent.push_back("        ldc \"" + value.sVal + "\""); break;
+                    default: break;
+                }
+            }
+
+            if (sym->index == -1) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    default: break;
+                }
+            } else {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Float: ctx->fileContent.push_back("        fstore " + std::to_string(sym->index)); break;
+                    case BK_Bool: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    default: break;                
+                }
+            }
         }
     }
     ;
@@ -709,7 +610,7 @@ for_simple_item
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
                     break;
                 case BK_Float:
@@ -717,7 +618,7 @@ for_simple_item
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
                     break;
                 case BK_String:
@@ -755,7 +656,7 @@ for_simple_item
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
                     break;
                 case BK_Float:
@@ -763,7 +664,7 @@ for_simple_item
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
                     break;
                 case BK_String:
@@ -799,142 +700,18 @@ for_simple_item
         ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkRead(expr, yylineno);
     }
-    | lvalue INC  {
-        Symbol* sym = $1;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+    | lvalue INC SEMICOLON {
+        if ($1 != nullptr) delete checkIncDecValid(true, $1, ctx, yylineno);
      }
-    | lvalue DEC  {
-        Symbol* sym = $1;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+    | lvalue DEC SEMICOLON {
+        if ($1 != nullptr) delete checkIncDecValid(false, $1, ctx, yylineno);
+     }
+    | INC lvalue SEMICOLON {
+        if ($2 != nullptr) delete checkIncDecValid(true, $2, ctx, yylineno);
+     }
+    | DEC lvalue SEMICOLON {
+        if ($2 != nullptr) delete checkIncDecValid(false, $2, ctx, yylineno);
     }
-    | INC lvalue  {
-        Symbol* sym = $2;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-     }
-    | DEC lvalue  {
-        Symbol* sym = $2;
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-     }
     ;
 
 assign_no_semi
@@ -945,6 +722,32 @@ assign_no_semi
         ExprInfo value = *$3; delete $3;
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
+
+            if (value.isConst) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(value.iVal)); break;
+                    case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
+                    case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
+                    case BK_String: ctx->fileContent.push_back("        ldc \"" + value.sVal + "\""); break;
+                    default: break;
+                }
+            }
+
+            if (sym->index == -1) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    default: break;
+                }
+            } else {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Float: ctx->fileContent.push_back("        fstore " + std::to_string(sym->index)); break;
+                    case BK_Bool: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    default: break;                
+                }
+            }
         }
     }
     ;
@@ -958,7 +761,7 @@ return_stmt
         if (expr.isConst) {
             switch (ctx->funcType->base) {
             case BK_Int:
-                ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                 ctx->fileContent.push_back("        ireturn");
                 break;
             case BK_Float:
@@ -966,7 +769,7 @@ return_stmt
                 ctx->fileContent.push_back("        freturn");
                 break;
             case BK_Bool:
-                ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                 ctx->fileContent.push_back("        ireturn");
                 break;
             default:
@@ -988,7 +791,7 @@ expression
             if (isStringConcat) {
                 $$ = concatStringResult(lhs, rhs, ctx->typePool, yylineno);
             } else {
-                $$ = numericOpResult(OPADD, lhs, rhs, ctx->typePool, yylineno);
+                $$ = numericOpResult(OPADD, lhs, rhs, ctx, yylineno);
             }
         }
     }
@@ -998,7 +801,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
+            $$ = numericOpResult(OPSUB, lhs, rhs, ctx, yylineno);
         }
     }
     | expression MUL   expression   {
@@ -1007,7 +810,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
+            $$ = numericOpResult(OPMUL, lhs, rhs, ctx, yylineno);
         }
     }
     | expression DIV   expression   {
@@ -1016,7 +819,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
+            $$ = numericOpResult(OPDIV, lhs, rhs, ctx, yylineno);
         }
     }
     | expression MOD   expression   { 
@@ -1025,7 +828,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
+            $$ = numericOpResult(OPMOD, lhs, rhs, ctx, yylineno);
         }
     }
     | expression LT    expression   { 
@@ -1129,39 +932,17 @@ expression
             $$ = unaryOpResult(false, expr, yylineno);
         }
     }
-    | INC expression %prec INC      {
-        ExprInfo expr = *$2; delete $2;
-        if(!expr.isValid) {
-            $$ = makeInvalidExpr();
-        }
-        else{
-            $$ = unaryOpResult(true, expr, yylineno);
-        }
-    }
-    | DEC expression %prec DEC      {
-        ExprInfo expr = *$2; delete $2;
-        if(!expr.isValid) {
-            $$ = makeInvalidExpr();
-        }
-        else{
-            $$ = unaryOpResult(false, expr, yylineno);
-        }
-    }
-    | expression INC %prec POSTINC {
-        ExprInfo expr = *$1; delete $1;
-        if (!expr.isValid) {
-            $$ = makeInvalidExpr();
-        } else {
-            $$ = unaryOpResult(true, expr, yylineno); // true 表示 ++
-        }
-    }
-    | expression DEC %prec POSTDEC {
-        ExprInfo expr = *$1; delete $1;
-        if (!expr.isValid) {
-            $$ = makeInvalidExpr();
-        } else {
-            $$ = unaryOpResult(false, expr, yylineno); // false 表示 --
-        }
+    | INC lvalue %prec INC      {
+        $$ = checkIncDecValid(true, $2, ctx, yylineno);
+     }
+    | DEC lvalue %prec DEC      {
+        $$ = checkIncDecValid(false, $2, ctx, yylineno);
+     }
+    | lvalue INC %prec POSTINC {
+        $$ = checkIncDecValid(true, $1, ctx, yylineno);
+     }
+    | lvalue DEC %prec POSTDEC {
+        $$ = checkIncDecValid(false, $1, ctx, yylineno);
     }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {

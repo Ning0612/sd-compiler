@@ -1,14 +1,11 @@
-int ga = 34;
-
+int global_A = 5;
+int global_B = 10;
 
 int add(int a, int b) {
-
     return 40;
 }
 
 void pp(int x) {
-    // Simulate printing an integer
-    // In a real implementation, this would output to console
     print "rwerw";
 }
 
@@ -17,15 +14,13 @@ int dw;
 int d = 432;
 
 void main(){
-    int a = 3445, b =24, c;
-    const string s = "Hello World" + " !";
-    println s;
-    float e;
-    a++;
-    ga++;
-    println 34.4 + 3;
-    println ga;
-    {
-        int x = 34;
-    }
+    int a = 10, b = 20, c = 30;
+
+    int result;
+    ++a;
+    result = a+++b;
+    println a;
+    println result;
+
+    int e;
 }

@@ -547,7 +547,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   556
+#define YYLAST   520
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  66
@@ -556,7 +556,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  106
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  215
+#define YYNSTATES  219
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   320
@@ -616,13 +616,13 @@ static const yytype_int16 yyrline[] =
      130,   139,   143,   182,   224,   225,   246,   246,   290,   290,
      330,   333,   339,   344,   352,   360,   360,   368,   369,   373,
      374,   378,   379,   383,   384,   385,   386,   387,   388,   393,
-     394,   440,   487,   494,   528,   562,   596,   630,   634,   647,
-     662,   666,   674,   678,   682,   686,   698,   699,   700,   704,
-     705,   750,   796,   802,   836,   870,   904,   941,   954,   981,
-     995,  1004,  1013,  1022,  1031,  1040,  1049,  1058,  1068,  1077,
-    1087,  1096,  1105,  1114,  1123,  1132,  1141,  1150,  1158,  1166,
-    1174,  1205,  1213,  1225,  1229,  1233,  1237,  1246,  1269,  1285,
-    1286,  1290,  1295,  1304,  1305,  1306,  1307
+     394,   440,   487,   494,   497,   500,   503,   506,   510,   548,
+     563,   567,   575,   579,   583,   587,   599,   600,   601,   605,
+     606,   651,   697,   703,   706,   709,   712,   718,   757,   784,
+     798,   807,   816,   825,   834,   843,   852,   861,   871,   880,
+     890,   899,   908,   917,   926,   935,   938,   941,   944,   947,
+     955,   986,   994,  1006,  1010,  1014,  1018,  1027,  1050,  1066,
+    1067,  1071,  1076,  1085,  1086,  1087,  1088
 };
 #endif
 
@@ -664,7 +664,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-99)
+#define YYPACT_NINF (-91)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -678,28 +678,28 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     -99,     2,   134,   -99,   -99,   -99,   -99,   -99,   -16,    19,
-     -99,   -99,   -99,   -99,    -3,   -23,    14,   -38,   -14,   -99,
-      19,    17,   178,    19,    34,   -99,    12,    25,   -99,    42,
-     178,    27,   -99,   -99,   -99,   -99,   178,   178,   178,   178,
-     178,   178,   -99,   461,   -99,   -99,    28,    40,   -99,    30,
-      19,   -99,   317,   178,   -31,   -31,   495,   -31,   -31,   202,
-     178,   178,   178,   178,   178,   178,   178,   178,   178,   178,
-     178,   178,   178,   -99,   -99,    35,   -99,   -99,   -99,   461,
-      37,    43,   -99,   512,   512,   512,   512,   512,   512,    31,
-      31,   -31,   -31,   -31,   495,   478,   -99,   176,   -99,   178,
-     176,    52,    80,    53,    56,    57,   178,   178,   178,    68,
-      59,    68,    68,   -99,   -99,   -99,   -99,   -99,   -99,    55,
-     176,   -99,   -99,   -99,   -99,    -8,   -99,   -99,   -99,    62,
-      34,   461,    60,   178,   103,   178,    10,    94,   338,   359,
-     380,   -99,    70,   178,    71,    77,   176,   -99,   -99,   178,
-      78,    81,   -99,   -99,   225,    82,   248,   178,   178,    68,
-      68,    68,    16,    18,   -99,   -99,    83,   -99,   -99,   -99,
-     -99,    84,   -99,   -99,    90,   401,   -99,   -99,    80,   178,
-      80,   461,   461,   -99,   -99,   -99,   178,   -99,   -99,    10,
-     178,   178,   -99,   -99,   -99,   121,   271,   -99,   461,   -99,
-     422,   443,    80,    97,    10,   101,   -99,   -99,   -41,   178,
-      80,   294,   -99,    80,   -99
+     -91,     4,   100,   -91,   -91,   -91,   -91,   -91,   -10,    32,
+     -91,   -91,   -91,   -91,    -2,   -24,    40,   -37,    28,   -91,
+      32,     0,    98,    32,    47,   -91,    34,    35,   -91,    65,
+      98,    50,   -91,   -91,   -91,   -91,    98,    98,    98,    72,
+      72,    98,    53,   442,   -91,   -91,    51,    66,   -91,    57,
+      32,   -91,   298,    98,   -91,   -91,   471,   -91,   -91,   -91,
+     176,   -91,   -91,    98,    98,    98,    98,    98,    98,    98,
+      98,    98,    98,    98,    98,    98,    58,   -91,   -91,   -91,
+     442,    63,    69,   -91,   482,   482,   482,   482,   482,   482,
+      56,    56,   -91,   -91,   -91,   471,   457,   -91,    14,   -91,
+      98,    14,    70,   180,    71,    79,    90,    98,    98,    98,
+      72,    91,    72,    72,   -91,   -91,   -91,   -91,   -91,   -91,
+      64,    14,   -91,   -91,   -91,   -91,   -38,   -91,   -91,   -91,
+      95,    47,   442,    92,    98,   131,    98,    46,   122,   319,
+     340,   361,   101,    98,   103,   104,    14,   -91,   -91,    98,
+     105,   106,   -91,   -91,   206,   107,   229,    98,    98,    72,
+      72,    72,    16,    31,   -91,   -91,   108,   -91,   -91,   -91,
+     -91,   110,   -91,   -91,   109,   382,   -91,   -91,   180,    98,
+     180,   442,   442,   -91,   113,   114,    98,   117,   118,    46,
+      98,    98,   -91,   -91,   -91,   147,   252,   -91,   -91,   -91,
+     442,   -91,   -91,   -91,   403,   424,   180,   119,    46,   125,
+     -91,   -91,   -43,    98,   180,   275,   -91,   180,   -91
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -712,41 +712,41 @@ static const yytype_int8 yydefact[] =
       20,     0,     0,    20,     0,    11,     0,    21,    22,     0,
        0,    49,    93,    94,    96,    95,     0,     0,     0,     0,
        0,     0,    90,    15,    91,    92,     0,    14,    13,     0,
-       0,    24,     0,    99,    84,    83,    82,    85,    86,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    87,    88,     0,    18,    23,    10,   101,
-       0,   100,    89,    75,    77,    78,    79,    74,    76,    69,
-      70,    71,    72,    73,    80,    81,    16,    27,    97,     0,
-      27,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      49,     0,     0,    47,    25,    31,     8,     9,    38,     0,
-      28,    30,    32,    33,    39,     0,    34,    35,    36,     0,
-       0,   102,     0,     0,     0,     0,    56,     0,     0,     0,
-       0,    49,     0,    99,     0,     0,    27,    19,    29,     0,
+       0,    24,     0,    99,    84,    83,    82,    49,    85,    86,
+       0,    87,    88,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    18,    23,    10,
+     101,     0,   100,    89,    75,    77,    78,    79,    74,    76,
+      69,    70,    71,    72,    73,    80,    81,    16,    27,    97,
+       0,    27,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    49,     0,     0,    47,    25,    31,     8,     9,    38,
+       0,    28,    30,    32,    33,    39,     0,    34,    35,    36,
+       0,     0,   102,     0,     0,     0,     0,    56,     0,     0,
+       0,     0,     0,    99,     0,     0,    27,    19,    29,     0,
        0,     0,    37,    17,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,    57,    59,     0,    68,    40,    41,
       42,     0,    45,    46,     0,     0,    43,    44,     0,     0,
-       0,    60,    61,    62,    65,    66,     0,    63,    64,     0,
-       0,     0,    98,    26,    48,    50,     0,    52,    67,    58,
-       0,     0,     0,     0,    56,     0,    51,    53,     0,     0,
-       0,     0,    54,     0,    55
+       0,    60,    61,    62,     0,     0,     0,     0,     0,     0,
+       0,     0,    98,    26,    48,    50,     0,    52,    65,    66,
+      67,    63,    64,    58,     0,     0,     0,     0,    56,     0,
+      51,    53,     0,     0,     0,     0,    54,     0,    55
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -99,   -99,   -99,   -99,   -99,   145,   146,   -99,   125,   -99,
-     -99,   -99,   129,   -99,   104,   -99,   -99,   -94,   -99,    33,
-     -98,   -99,   -99,   -39,   -99,   -99,   -49,   -33,   -99,   -99,
-     -22,   -99,   -99,   -99,    15,   -99,     1
+     -91,   -91,   -91,   -91,   -91,   169,   170,   -91,   149,   -91,
+     -91,   -91,   151,   -91,   127,   -91,   -91,   -90,   -91,    54,
+     -80,   -91,   -91,   -30,   -91,   -91,   -29,    -9,   -91,   -91,
+     -22,   -91,   -91,   -91,    38,   -91,    52
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
-       0,     1,     2,    10,   115,   116,   117,    18,    19,    13,
-     100,    97,    26,    27,    28,   118,   146,   119,   120,   121,
-     122,   123,   124,    42,   126,   127,   163,   164,   165,   128,
-      79,    44,    45,   129,    80,    81,   130
+       0,     1,     2,    10,   116,   117,   118,    18,    19,    13,
+     101,    98,    26,    27,    28,   119,   146,   120,   121,   122,
+     123,   124,   125,    42,   127,   128,   163,   164,   165,   129,
+      80,    44,    45,   130,    81,    82,   131
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -754,122 +754,116 @@ static const yytype_uint8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-      43,    22,     3,    14,   134,   189,   132,    15,    52,   210,
-      16,    23,    73,    74,    54,    55,    56,    57,    58,    59,
-      17,    29,     4,     5,    29,     6,    20,     7,   157,   158,
-     159,   149,    24,   141,    25,   150,   151,    21,    83,    84,
-      85,    86,    87,    88,    89,    90,    91,    92,    93,    94,
-      95,    29,   174,   160,   161,   186,    30,    47,   125,   187,
-     188,   125,    49,   125,   189,    51,   190,    68,    69,    70,
-     142,    50,   144,   145,    73,    74,    53,   131,    75,    22,
-     195,   125,   197,    76,   138,   139,   140,    98,    96,    99,
-     101,   141,   102,   103,   104,   105,   106,   162,   107,   108,
-     109,   133,   135,   110,   206,   136,   137,   125,   143,   147,
-     152,   154,   212,   156,   153,   214,   155,   166,   170,   172,
-     183,   184,   185,   111,   112,   173,   176,   175,   113,   177,
-     191,   179,   202,   114,   192,   181,   182,     4,     5,   125,
-       6,   125,     7,     8,   193,   207,   209,    11,    12,    48,
-     162,     9,    46,   148,    77,   208,   199,   196,   171,     0,
-       0,     0,     0,   125,   198,   162,     0,     0,   200,   201,
-       0,   125,     0,     0,   125,     0,     0,     0,     0,     4,
-       5,     0,     6,     0,     7,     0,   101,   211,   102,   103,
-     104,   105,   106,     9,   107,   108,   109,     0,     0,   110,
-       0,    31,    32,    33,    34,    35,     0,     0,     0,     0,
-       0,     0,    36,    37,     0,     0,     0,     0,    38,   111,
-     112,    39,    40,     0,   113,     0,     0,    41,     0,   114,
-      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
-      70,     0,     0,    71,    72,    73,    74,     0,     0,     0,
-       0,     0,    82,    60,    61,    62,    63,    64,    65,    66,
-      67,    68,    69,    70,     0,     0,    71,    72,    73,    74,
-       0,     0,     0,     0,     0,   178,    60,    61,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,     0,     0,    71,
-      72,    73,    74,     0,     0,     0,     0,     0,   180,    60,
-      61,    62,    63,    64,    65,    66,    67,    68,    69,    70,
-       0,     0,    71,    72,    73,    74,     0,     0,     0,     0,
-       0,   203,    60,    61,    62,    63,    64,    65,    66,    67,
-      68,    69,    70,     0,     0,    71,    72,    73,    74,     0,
-       0,     0,     0,     0,   213,    60,    61,    62,    63,    64,
-      65,    66,    67,    68,    69,    70,     0,     0,    71,    72,
-      73,    74,     0,     0,     0,    78,    60,    61,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,     0,     0,    71,
-      72,    73,    74,     0,     0,     0,   167,    60,    61,    62,
-      63,    64,    65,    66,    67,    68,    69,    70,     0,     0,
-      71,    72,    73,    74,     0,     0,     0,   168,    60,    61,
-      62,    63,    64,    65,    66,    67,    68,    69,    70,     0,
-       0,    71,    72,    73,    74,     0,     0,     0,   169,    60,
-      61,    62,    63,    64,    65,    66,    67,    68,    69,    70,
-       0,     0,    71,    72,    73,    74,     0,     0,     0,   194,
-      60,    61,    62,    63,    64,    65,    66,    67,    68,    69,
-      70,     0,     0,    71,    72,    73,    74,     0,     0,     0,
-     204,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,     0,     0,    71,    72,    73,    74,   205,    60,
-      61,    62,    63,    64,    65,    66,    67,    68,    69,    70,
-       0,     0,    71,    72,    73,    74,    60,    61,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,     0,     0,    71,
-       0,    73,    74,    60,    61,    62,    63,    64,    65,    66,
-      67,    68,    69,    70,     0,     0,     0,     0,    73,    74,
-      -1,    -1,    -1,    -1,    -1,    -1,    66,    67,    68,    69,
-      70,     0,     0,     0,     0,    73,    74
+      43,   149,    22,   189,     3,   150,   151,   214,    52,    58,
+      59,   133,    23,    15,    54,    55,    56,     4,     5,    60,
+       6,    17,     7,   135,   102,    20,   103,   104,   105,   106,
+     107,     9,   108,   109,   110,     4,     5,   111,     6,    30,
+       7,    84,    85,    86,    87,    88,    89,    90,    91,    92,
+      93,    94,    95,    96,    14,   186,   174,   112,   113,   187,
+     188,    16,   114,    21,   157,   158,   159,   115,   126,    57,
+      47,   126,    29,   126,    24,    29,    25,   189,   132,   190,
+     142,    50,   144,   145,    49,   139,   140,   141,    51,   160,
+     161,   126,    71,    72,    73,    57,    61,    62,   195,    53,
+     197,    76,    29,     4,     5,    22,     6,   162,     7,     8,
+      77,    97,   154,    99,   156,   100,   126,     9,   147,   134,
+     136,    31,    32,    33,    34,    35,   210,   175,   137,   183,
+     184,   185,    36,    37,   216,   181,   182,   218,    38,   138,
+     143,    39,    40,   152,   155,   166,   153,    41,   126,   170,
+     126,   172,   173,   176,   177,   191,   179,   196,   206,   162,
+     192,   198,   199,   193,   200,   201,   202,   211,   204,   205,
+     213,    11,    12,    48,    46,   148,   126,    78,   162,   212,
+     203,   171,     0,     0,   126,     0,     0,   126,     0,     0,
+     102,   215,   103,   104,   105,   106,   107,     0,   108,   109,
+     110,     0,     0,   111,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,    73,     0,     0,    74,    75,     0,
+       0,     0,     0,   112,   113,     0,    83,     0,   114,     0,
+       0,     0,     0,   115,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,    73,     0,     0,    74,    75,     0,
+       0,     0,     0,     0,     0,     0,   178,    63,    64,    65,
+      66,    67,    68,    69,    70,    71,    72,    73,     0,     0,
+      74,    75,     0,     0,     0,     0,     0,     0,     0,   180,
+      63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+      73,     0,     0,    74,    75,     0,     0,     0,     0,     0,
+       0,     0,   207,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73,     0,     0,    74,    75,     0,     0,
+       0,     0,     0,     0,     0,   217,    63,    64,    65,    66,
+      67,    68,    69,    70,    71,    72,    73,     0,     0,    74,
+      75,     0,     0,     0,     0,     0,    79,    63,    64,    65,
+      66,    67,    68,    69,    70,    71,    72,    73,     0,     0,
+      74,    75,     0,     0,     0,     0,     0,   167,    63,    64,
+      65,    66,    67,    68,    69,    70,    71,    72,    73,     0,
+       0,    74,    75,     0,     0,     0,     0,     0,   168,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,    73,
+       0,     0,    74,    75,     0,     0,     0,     0,     0,   169,
+      63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+      73,     0,     0,    74,    75,     0,     0,     0,     0,     0,
+     194,    63,    64,    65,    66,    67,    68,    69,    70,    71,
+      72,    73,     0,     0,    74,    75,     0,     0,     0,     0,
+       0,   208,    63,    64,    65,    66,    67,    68,    69,    70,
+      71,    72,    73,     0,     0,    74,    75,     0,     0,   209,
+      63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+      73,     0,     0,    74,    75,    63,    64,    65,    66,    67,
+      68,    69,    70,    71,    72,    73,     0,     0,    74,    63,
+      64,    65,    66,    67,    68,    69,    70,    71,    72,    73,
+      -1,    -1,    -1,    -1,    -1,    -1,    69,    70,    71,    72,
+      73
 };
 
 static const yytype_int16 yycheck[] =
 {
-      22,    39,     0,     2,   102,    46,   100,    23,    30,    50,
-       9,    49,    43,    44,    36,    37,    38,    39,    40,    41,
-      23,    20,     3,     4,    23,     6,    49,     8,    18,    19,
-      20,    39,    46,    23,    48,    43,    44,    23,    60,    61,
-      62,    63,    64,    65,    66,    67,    68,    69,    70,    71,
-      72,    50,   146,    43,    44,    39,    39,    23,    97,    43,
-      44,   100,    50,   102,    46,    23,    48,    36,    37,    38,
-     109,    46,   111,   112,    43,    44,    49,    99,    50,    39,
-     178,   120,   180,    53,   106,   107,   108,    50,    53,    46,
-      10,    23,    12,    13,    14,    15,    16,   136,    18,    19,
-      20,    49,    49,    23,   202,    49,    49,   146,    49,    54,
-      48,   133,   210,   135,    54,   213,    13,    23,    48,    48,
-     159,   160,   161,    43,    44,    48,    48,   149,    48,    48,
-      47,    49,    11,    53,    50,   157,   158,     3,     4,   178,
-       6,   180,     8,     9,    54,    48,    45,     2,     2,    24,
-     189,    17,    23,   120,    50,   204,   189,   179,   143,    -1,
-      -1,    -1,    -1,   202,   186,   204,    -1,    -1,   190,   191,
-      -1,   210,    -1,    -1,   213,    -1,    -1,    -1,    -1,     3,
-       4,    -1,     6,    -1,     8,    -1,    10,   209,    12,    13,
-      14,    15,    16,    17,    18,    19,    20,    -1,    -1,    23,
-      -1,    23,    24,    25,    26,    27,    -1,    -1,    -1,    -1,
-      -1,    -1,    34,    35,    -1,    -1,    -1,    -1,    40,    43,
-      44,    43,    44,    -1,    48,    -1,    -1,    49,    -1,    53,
+      22,    39,    39,    46,     0,    43,    44,    50,    30,    39,
+      40,   101,    49,    23,    36,    37,    38,     3,     4,    41,
+       6,    23,     8,   103,    10,    49,    12,    13,    14,    15,
+      16,    17,    18,    19,    20,     3,     4,    23,     6,    39,
+       8,    63,    64,    65,    66,    67,    68,    69,    70,    71,
+      72,    73,    74,    75,     2,    39,   146,    43,    44,    43,
+      44,     9,    48,    23,    18,    19,    20,    53,    98,    23,
+      23,   101,    20,   103,    46,    23,    48,    46,   100,    48,
+     110,    46,   112,   113,    50,   107,   108,   109,    23,    43,
+      44,   121,    36,    37,    38,    23,    43,    44,   178,    49,
+     180,    50,    50,     3,     4,    39,     6,   137,     8,     9,
+      53,    53,   134,    50,   136,    46,   146,    17,    54,    49,
+      49,    23,    24,    25,    26,    27,   206,   149,    49,   159,
+     160,   161,    34,    35,   214,   157,   158,   217,    40,    49,
+      49,    43,    44,    48,    13,    23,    54,    49,   178,    48,
+     180,    48,    48,    48,    48,    47,    49,   179,    11,   189,
+      50,    48,    48,    54,   186,    48,    48,    48,   190,   191,
+      45,     2,     2,    24,    23,   121,   206,    50,   208,   208,
+     189,   143,    -1,    -1,   214,    -1,    -1,   217,    -1,    -1,
+      10,   213,    12,    13,    14,    15,    16,    -1,    18,    19,
+      20,    -1,    -1,    23,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    37,    38,    -1,    -1,    41,    42,    -1,
+      -1,    -1,    -1,    43,    44,    -1,    50,    -1,    48,    -1,
+      -1,    -1,    -1,    53,    28,    29,    30,    31,    32,    33,
+      34,    35,    36,    37,    38,    -1,    -1,    41,    42,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    50,    28,    29,    30,
+      31,    32,    33,    34,    35,    36,    37,    38,    -1,    -1,
+      41,    42,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    50,
       28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      38,    -1,    -1,    41,    42,    43,    44,    -1,    -1,    -1,
+      38,    -1,    -1,    41,    42,    -1,    -1,    -1,    -1,    -1,
       -1,    -1,    50,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    -1,    -1,    41,    42,    43,    44,
+      35,    36,    37,    38,    -1,    -1,    41,    42,    -1,    -1,
       -1,    -1,    -1,    -1,    -1,    50,    28,    29,    30,    31,
       32,    33,    34,    35,    36,    37,    38,    -1,    -1,    41,
-      42,    43,    44,    -1,    -1,    -1,    -1,    -1,    50,    28,
-      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
-      -1,    -1,    41,    42,    43,    44,    -1,    -1,    -1,    -1,
-      -1,    50,    28,    29,    30,    31,    32,    33,    34,    35,
-      36,    37,    38,    -1,    -1,    41,    42,    43,    44,    -1,
-      -1,    -1,    -1,    -1,    50,    28,    29,    30,    31,    32,
-      33,    34,    35,    36,    37,    38,    -1,    -1,    41,    42,
-      43,    44,    -1,    -1,    -1,    48,    28,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    38,    -1,    -1,    41,
-      42,    43,    44,    -1,    -1,    -1,    48,    28,    29,    30,
+      42,    -1,    -1,    -1,    -1,    -1,    48,    28,    29,    30,
       31,    32,    33,    34,    35,    36,    37,    38,    -1,    -1,
-      41,    42,    43,    44,    -1,    -1,    -1,    48,    28,    29,
+      41,    42,    -1,    -1,    -1,    -1,    -1,    48,    28,    29,
       30,    31,    32,    33,    34,    35,    36,    37,    38,    -1,
-      -1,    41,    42,    43,    44,    -1,    -1,    -1,    48,    28,
+      -1,    41,    42,    -1,    -1,    -1,    -1,    -1,    48,    28,
       29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
-      -1,    -1,    41,    42,    43,    44,    -1,    -1,    -1,    48,
+      -1,    -1,    41,    42,    -1,    -1,    -1,    -1,    -1,    48,
       28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      38,    -1,    -1,    41,    42,    43,    44,    -1,    -1,    -1,
+      38,    -1,    -1,    41,    42,    -1,    -1,    -1,    -1,    -1,
       48,    28,    29,    30,    31,    32,    33,    34,    35,    36,
-      37,    38,    -1,    -1,    41,    42,    43,    44,    45,    28,
-      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
-      -1,    -1,    41,    42,    43,    44,    28,    29,    30,    31,
-      32,    33,    34,    35,    36,    37,    38,    -1,    -1,    41,
-      -1,    43,    44,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    -1,    -1,    -1,    -1,    43,    44,
+      37,    38,    -1,    -1,    41,    42,    -1,    -1,    -1,    -1,
+      -1,    48,    28,    29,    30,    31,    32,    33,    34,    35,
+      36,    37,    38,    -1,    -1,    41,    42,    -1,    -1,    45,
       28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      38,    -1,    -1,    -1,    -1,    43,    44
+      38,    -1,    -1,    41,    42,    28,    29,    30,    31,    32,
+      33,    34,    35,    36,    37,    38,    -1,    -1,    41,    28,
+      29,    30,    31,    32,    33,    34,    35,    36,    37,    38,
+      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
+      38
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -881,23 +875,23 @@ static const yytype_int8 yystos[] =
       49,    23,    39,    49,    46,    48,    78,    79,    80,   102,
       39,    23,    24,    25,    26,    27,    34,    35,    40,    43,
       44,    49,    89,    96,    97,    98,    78,    23,    74,    50,
-      46,    23,    96,    49,    96,    96,    96,    96,    96,    96,
-      28,    29,    30,    31,    32,    33,    34,    35,    36,    37,
-      38,    41,    42,    43,    44,    50,    53,    80,    48,    96,
-     100,   101,    50,    96,    96,    96,    96,    96,    96,    96,
-      96,    96,    96,    96,    96,    96,    53,    77,    50,    46,
-      76,    10,    12,    13,    14,    15,    16,    18,    19,    20,
-      23,    43,    44,    48,    53,    70,    71,    72,    81,    83,
-      84,    85,    86,    87,    88,    89,    90,    91,    95,    99,
-     102,    96,    83,    49,    86,    49,    49,    49,    96,    96,
-      96,    23,    89,    49,    89,    89,    82,    54,    85,    39,
+      46,    23,    96,    49,    96,    96,    96,    23,    89,    89,
+      96,    43,    44,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    41,    42,    50,    53,    80,    48,
+      96,   100,   101,    50,    96,    96,    96,    96,    96,    96,
+      96,    96,    96,    96,    96,    96,    96,    53,    77,    50,
+      46,    76,    10,    12,    13,    14,    15,    16,    18,    19,
+      20,    23,    43,    44,    48,    53,    70,    71,    72,    81,
+      83,    84,    85,    86,    87,    88,    89,    90,    91,    95,
+      99,   102,    96,    83,    49,    86,    49,    49,    49,    96,
+      96,    96,    89,    49,    89,    89,    82,    54,    85,    39,
       43,    44,    48,    54,    96,    13,    96,    18,    19,    20,
       43,    44,    89,    92,    93,    94,    23,    48,    48,    48,
       48,   100,    48,    48,    83,    96,    48,    48,    50,    49,
       50,    96,    96,    89,    89,    89,    39,    43,    44,    46,
-      48,    47,    50,    54,    48,    86,    96,    86,    96,    93,
-      96,    96,    11,    50,    48,    45,    86,    48,    92,    45,
-      50,    96,    86,    50,    86
+      48,    47,    50,    54,    48,    86,    96,    86,    48,    48,
+      96,    48,    48,    93,    96,    96,    11,    50,    48,    45,
+      86,    48,    92,    45,    50,    96,    86,    50,    86
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -925,7 +919,7 @@ static const yytype_int8 yyr2[] =
        1,     1,     1,     1,     1,     1,     1,     2,     1,     1,
        3,     3,     3,     3,     3,     3,     3,     1,     4,     1,
        5,     7,     5,     7,     9,    10,     0,     1,     3,     1,
-       2,     2,     2,     2,     2,     2,     2,     3,     3,     3,
+       2,     2,     2,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     3,     3,     3,     3,     3,     3,     3,     3,
        3,     3,     2,     2,     2,     2,     2,     2,     2,     3,
        1,     1,     1,     1,     1,     1,     1,     4,     4,     0,
@@ -1411,7 +1405,7 @@ yyreduce:
         ctx->symTab.leaveScope();
         printf("\n");
     }
-#line 1415 "src/y.tab.cpp"
+#line 1409 "src/y.tab.cpp"
     break;
 
   case 10: /* const_decl: CONST type_spec ID ASSIGN expression SEMICOLON  */
@@ -1421,7 +1415,7 @@ yyreduce:
         ExprInfo value = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         tryDeclareConstant(ctx->symTab, id, (yyvsp[-4].type), value, yylineno);
     }
-#line 1425 "src/y.tab.cpp"
+#line 1419 "src/y.tab.cpp"
     break;
 
   case 12: /* var_init_list: var_init  */
@@ -1444,11 +1438,11 @@ yyreduce:
             int index = ctx->symTab.lookup(varInit.name)->index;
             switch (varInit.valueKind) {
                 case VK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
                 case VK_Float:
                     ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
                 case VK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
                 default:
                     SemanticError("unsupported type for local variable", yylineno); break;
             }
@@ -1465,7 +1459,7 @@ yyreduce:
             }
         }
     }
-#line 1469 "src/y.tab.cpp"
+#line 1463 "src/y.tab.cpp"
     break;
 
   case 13: /* var_init_list: var_init_list COMMA var_init  */
@@ -1488,11 +1482,11 @@ yyreduce:
             int index = ctx->symTab.lookup(varInit.name)->index;
             switch (varInit.valueKind) {
                 case VK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
                 case VK_Float:
                     ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
                 case VK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(varInit.iVal ? "1" : "0")); break;
+                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
                 default:
                     SemanticError("unsupported type for local variable", yylineno); break;
             }
@@ -1509,13 +1503,13 @@ yyreduce:
             }
         }
     }
-#line 1513 "src/y.tab.cpp"
+#line 1507 "src/y.tab.cpp"
     break;
 
   case 14: /* var_init: ID  */
 #line 224 "src/p3_parser.y"
                              { (yyval.var_init_) = new VarInit(*(yyvsp[0].sval), ctx->nowType); delete (yyvsp[0].sval); }
-#line 1519 "src/y.tab.cpp"
+#line 1513 "src/y.tab.cpp"
     break;
 
   case 15: /* var_init: ID ASSIGN expression  */
@@ -1537,7 +1531,7 @@ yyreduce:
             (yyval.var_init_) = new VarInit(id, expr);
         }
     }
-#line 1541 "src/y.tab.cpp"
+#line 1535 "src/y.tab.cpp"
     break;
 
   case 16: /* $@1: %empty  */
@@ -1564,7 +1558,7 @@ yyreduce:
 
         declareFunction(funcName, (yyvsp[-5].type), paramList, ctx->typePool, ctx->symTab, yylineno);
     }
-#line 1568 "src/y.tab.cpp"
+#line 1562 "src/y.tab.cpp"
     break;
 
   case 17: /* func_decl: type_spec ID LPAREN param_list_opt RPAREN LBRACE $@1 block_items_opt RBRACE  */
@@ -1592,7 +1586,7 @@ yyreduce:
         ctx->fileContent.push_back("");
         ctx->symTab.leaveScope();
     }
-#line 1596 "src/y.tab.cpp"
+#line 1590 "src/y.tab.cpp"
     break;
 
   case 18: /* $@2: %empty  */
@@ -1623,7 +1617,7 @@ yyreduce:
 
         declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
     }
-#line 1627 "src/y.tab.cpp"
+#line 1621 "src/y.tab.cpp"
     break;
 
   case 19: /* func_decl: VOID_TOK ID LPAREN param_list_opt RPAREN LBRACE $@2 block_items_opt RBRACE  */
@@ -1639,7 +1633,7 @@ yyreduce:
         ctx->fileContent.push_back("    }");
         ctx->fileContent.push_back("");
     }
-#line 1643 "src/y.tab.cpp"
+#line 1637 "src/y.tab.cpp"
     break;
 
   case 20: /* param_list_opt: %empty  */
@@ -1647,7 +1641,7 @@ yyreduce:
                 {
         (yyval.symbol_list) = new std::vector<Symbol>();
     }
-#line 1651 "src/y.tab.cpp"
+#line 1645 "src/y.tab.cpp"
     break;
 
   case 21: /* param_list_opt: param_list  */
@@ -1655,7 +1649,7 @@ yyreduce:
                  {
         (yyval.symbol_list) = (yyvsp[0].symbol_list);
     }
-#line 1659 "src/y.tab.cpp"
+#line 1653 "src/y.tab.cpp"
     break;
 
   case 22: /* param_list: param  */
@@ -1665,7 +1659,7 @@ yyreduce:
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1669 "src/y.tab.cpp"
+#line 1663 "src/y.tab.cpp"
     break;
 
   case 23: /* param_list: param_list COMMA param  */
@@ -1675,7 +1669,7 @@ yyreduce:
         (yyval.symbol_list)->push_back(*(yyvsp[0].symbol));
         delete (yyvsp[0].symbol);
     }
-#line 1679 "src/y.tab.cpp"
+#line 1673 "src/y.tab.cpp"
     break;
 
   case 24: /* param: type_spec ID  */
@@ -1684,7 +1678,7 @@ yyreduce:
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         (yyval.symbol) = new Symbol(id, (yyvsp[-1].type), false);
     }
-#line 1688 "src/y.tab.cpp"
+#line 1682 "src/y.tab.cpp"
     break;
 
   case 25: /* $@3: %empty  */
@@ -1692,7 +1686,7 @@ yyreduce:
              {
         ctx->symTab.enterScope();
     }
-#line 1696 "src/y.tab.cpp"
+#line 1690 "src/y.tab.cpp"
     break;
 
   case 26: /* block: LBRACE $@3 block_items_opt RBRACE  */
@@ -1700,7 +1694,7 @@ yyreduce:
                              {
         ctx->symTab.leaveScope();
     }
-#line 1704 "src/y.tab.cpp"
+#line 1698 "src/y.tab.cpp"
     break;
 
   case 40: /* simple_stmt: PRINT expression SEMICOLON  */
@@ -1713,7 +1707,7 @@ yyreduce:
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
                     break;
                 case BK_Float:
@@ -1721,7 +1715,7 @@ yyreduce:
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
                     break;
                 case BK_String:
@@ -1751,7 +1745,7 @@ yyreduce:
             }
         }
     }
-#line 1755 "src/y.tab.cpp"
+#line 1749 "src/y.tab.cpp"
     break;
 
   case 41: /* simple_stmt: PRINTLN expression SEMICOLON  */
@@ -1764,7 +1758,7 @@ yyreduce:
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
                     break;
                 case BK_Float:
@@ -1772,7 +1766,7 @@ yyreduce:
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
                     break;
                 case BK_String:
@@ -1803,7 +1797,7 @@ yyreduce:
             }
         }
     }
-#line 1807 "src/y.tab.cpp"
+#line 1801 "src/y.tab.cpp"
     break;
 
   case 42: /* simple_stmt: READ lvalue SEMICOLON  */
@@ -1815,167 +1809,43 @@ yyreduce:
         if (expr.isValid) checkRead(expr, yylineno);
         SemanticError("read statement not supported in code generation", yylineno);
     }
-#line 1819 "src/y.tab.cpp"
+#line 1813 "src/y.tab.cpp"
     break;
 
   case 43: /* simple_stmt: lvalue INC SEMICOLON  */
 #line 494 "src/p3_parser.y"
                            {
-        Symbol* sym = (yyvsp[-2].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;        
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(true, (yyvsp[-2].symbol), ctx, yylineno);
      }
-#line 1858 "src/y.tab.cpp"
+#line 1821 "src/y.tab.cpp"
     break;
 
   case 44: /* simple_stmt: lvalue DEC SEMICOLON  */
-#line 528 "src/p3_parser.y"
+#line 497 "src/p3_parser.y"
                            {
-        Symbol* sym = (yyvsp[-2].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-    }
-#line 1897 "src/y.tab.cpp"
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(false, (yyvsp[-2].symbol), ctx, yylineno);
+     }
+#line 1829 "src/y.tab.cpp"
     break;
 
   case 45: /* simple_stmt: INC lvalue SEMICOLON  */
-#line 562 "src/p3_parser.y"
+#line 500 "src/p3_parser.y"
                            {
-        Symbol* sym = (yyvsp[-1].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(true, (yyvsp[-1].symbol), ctx, yylineno);
      }
-#line 1936 "src/y.tab.cpp"
+#line 1837 "src/y.tab.cpp"
     break;
 
   case 46: /* simple_stmt: DEC lvalue SEMICOLON  */
-#line 596 "src/p3_parser.y"
+#line 503 "src/p3_parser.y"
                            {
-        Symbol* sym = (yyvsp[-1].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(false, (yyvsp[-1].symbol), ctx, yylineno);
     }
-#line 1975 "src/y.tab.cpp"
+#line 1845 "src/y.tab.cpp"
     break;
 
   case 48: /* assign_stmt: lvalue ASSIGN expression SEMICOLON  */
-#line 634 "src/p3_parser.y"
+#line 510 "src/p3_parser.y"
                                          {
         Symbol* sym = (yyvsp[-3].symbol);
         ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
@@ -1983,13 +1853,38 @@ yyreduce:
         ExprInfo value = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
+            if (value.isConst) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(value.iVal)); break;
+                    case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
+                    case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
+                    case BK_String: ctx->fileContent.push_back("        ldc \"" + value.sVal + "\""); break;
+                    default: break;
+                }
+            }
+
+            if (sym->index == -1) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    default: break;
+                }
+            } else {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Float: ctx->fileContent.push_back("        fstore " + std::to_string(sym->index)); break;
+                    case BK_Bool: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    default: break;                
+                }
+            }
         }
     }
-#line 1989 "src/y.tab.cpp"
+#line 1884 "src/y.tab.cpp"
     break;
 
   case 49: /* lvalue: ID  */
-#line 647 "src/p3_parser.y"
+#line 548 "src/p3_parser.y"
          {
         std::string id = *(yyvsp[0].sval); delete (yyvsp[0].sval);
         Symbol* symbol = ctx->symTab.lookup(id);
@@ -2001,56 +1896,56 @@ yyreduce:
             (yyval.symbol) = symbol;
         }
     }
-#line 2005 "src/y.tab.cpp"
+#line 1900 "src/y.tab.cpp"
     break;
 
   case 50: /* if_stmt: IF LPAREN expression RPAREN statement  */
-#line 662 "src/p3_parser.y"
+#line 563 "src/p3_parser.y"
                                                       {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 2014 "src/y.tab.cpp"
+#line 1909 "src/y.tab.cpp"
     break;
 
   case 51: /* if_stmt: IF LPAREN expression RPAREN statement ELSE statement  */
-#line 666 "src/p3_parser.y"
+#line 567 "src/p3_parser.y"
                                                            {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
         if (expr.isValid) checkBoolExpr("if", expr, yylineno);
     }
-#line 2023 "src/y.tab.cpp"
+#line 1918 "src/y.tab.cpp"
     break;
 
   case 52: /* loop_stmt: WHILE LPAREN expression RPAREN statement  */
-#line 674 "src/p3_parser.y"
+#line 575 "src/p3_parser.y"
                                               { 
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
     }
-#line 2032 "src/y.tab.cpp"
+#line 1927 "src/y.tab.cpp"
     break;
 
   case 53: /* loop_stmt: DO statement WHILE LPAREN expression RPAREN SEMICOLON  */
-#line 678 "src/p3_parser.y"
+#line 579 "src/p3_parser.y"
                                                             {
         ExprInfo expr = *(yyvsp[-2].expr_info); delete (yyvsp[-2].expr_info);
         if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
     }
-#line 2041 "src/y.tab.cpp"
+#line 1936 "src/y.tab.cpp"
     break;
 
   case 54: /* loop_stmt: FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement  */
-#line 682 "src/p3_parser.y"
+#line 583 "src/p3_parser.y"
                                                                                               {
         ExprInfo expr = *(yyvsp[-4].expr_info); delete (yyvsp[-4].expr_info);
         if (expr.isValid) checkBoolExpr("for", expr, yylineno);
     }
-#line 2050 "src/y.tab.cpp"
+#line 1945 "src/y.tab.cpp"
     break;
 
   case 55: /* loop_stmt: FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement  */
-#line 686 "src/p3_parser.y"
+#line 587 "src/p3_parser.y"
                                                                             {
         ExprInfo from = *(yyvsp[-5].expr_info); ExprInfo to = *(yyvsp[-2].expr_info); delete (yyvsp[-5].expr_info); delete (yyvsp[-2].expr_info);
         std::string id = *(yyvsp[-7].sval); delete (yyvsp[-7].sval);
@@ -2059,11 +1954,11 @@ yyreduce:
         }
         checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
-#line 2063 "src/y.tab.cpp"
+#line 1958 "src/y.tab.cpp"
     break;
 
   case 60: /* for_simple_item: PRINT expression  */
-#line 705 "src/p3_parser.y"
+#line 606 "src/p3_parser.y"
                          {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
@@ -2071,7 +1966,7 @@ yyreduce:
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
                     break;
                 case BK_Float:
@@ -2079,7 +1974,7 @@ yyreduce:
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
                     break;
                 case BK_String:
@@ -2109,11 +2004,11 @@ yyreduce:
             }
         }
     }
-#line 2113 "src/y.tab.cpp"
+#line 2008 "src/y.tab.cpp"
     break;
 
   case 61: /* for_simple_item: PRINTLN expression  */
-#line 750 "src/p3_parser.y"
+#line 651 "src/p3_parser.y"
                           {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (expr.isValid) checkPrint(expr, yylineno);
@@ -2122,7 +2017,7 @@ yyreduce:
         if (expr.isConst) {
             switch (expr.type->base) {
                 case BK_Int:
-                    ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
                     break;
                 case BK_Float:
@@ -2130,7 +2025,7 @@ yyreduce:
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
                     break;
                 case BK_Bool:
-                    ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                     ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
                     break;
                 case BK_String:
@@ -2160,178 +2055,54 @@ yyreduce:
             }
         }
     }
-#line 2164 "src/y.tab.cpp"
+#line 2059 "src/y.tab.cpp"
     break;
 
   case 62: /* for_simple_item: READ lvalue  */
-#line 796 "src/p3_parser.y"
+#line 697 "src/p3_parser.y"
                    {
         Symbol* sym = (yyvsp[0].symbol);
         ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
         ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkRead(expr, yylineno);
     }
-#line 2175 "src/y.tab.cpp"
+#line 2070 "src/y.tab.cpp"
     break;
 
-  case 63: /* for_simple_item: lvalue INC  */
-#line 802 "src/p3_parser.y"
-                  {
-        Symbol* sym = (yyvsp[-1].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+  case 63: /* for_simple_item: lvalue INC SEMICOLON  */
+#line 703 "src/p3_parser.y"
+                           {
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(true, (yyvsp[-2].symbol), ctx, yylineno);
      }
-#line 2214 "src/y.tab.cpp"
+#line 2078 "src/y.tab.cpp"
     break;
 
-  case 64: /* for_simple_item: lvalue DEC  */
-#line 836 "src/p3_parser.y"
-                  {
-        Symbol* sym = (yyvsp[-1].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
+  case 64: /* for_simple_item: lvalue DEC SEMICOLON  */
+#line 706 "src/p3_parser.y"
+                           {
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(false, (yyvsp[-2].symbol), ctx, yylineno);
+     }
+#line 2086 "src/y.tab.cpp"
+    break;
+
+  case 65: /* for_simple_item: INC lvalue SEMICOLON  */
+#line 709 "src/p3_parser.y"
+                           {
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(true, (yyvsp[-1].symbol), ctx, yylineno);
+     }
+#line 2094 "src/y.tab.cpp"
+    break;
+
+  case 66: /* for_simple_item: DEC lvalue SEMICOLON  */
+#line 712 "src/p3_parser.y"
+                           {
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(false, (yyvsp[-1].symbol), ctx, yylineno);
     }
-#line 2253 "src/y.tab.cpp"
-    break;
-
-  case 65: /* for_simple_item: INC lvalue  */
-#line 870 "src/p3_parser.y"
-                  {
-        Symbol* sym = (yyvsp[0].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("increment", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        iadd");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fadd");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-     }
-#line 2292 "src/y.tab.cpp"
-    break;
-
-  case 66: /* for_simple_item: DEC lvalue  */
-#line 904 "src/p3_parser.y"
-                  {
-        Symbol* sym = (yyvsp[0].symbol);
-        ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
-        ExprInfo expr = *exprPtr; delete exprPtr;
-        if (expr.isValid) checkIncDecValid("decrement", expr, yylineno);
-        if (sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        putstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        putstatic float " + sym->name);
-                }
-            }
-            else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        sipush 1");
-                    ctx->fileContent.push_back("        isub");
-                    ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                    ctx->fileContent.push_back("        ldc 1.0f");
-                    ctx->fileContent.push_back("        fsub");
-                    ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                }
-            }
-        }
-     }
-#line 2331 "src/y.tab.cpp"
+#line 2102 "src/y.tab.cpp"
     break;
 
   case 67: /* assign_no_semi: lvalue ASSIGN expression  */
-#line 941 "src/p3_parser.y"
+#line 718 "src/p3_parser.y"
                                {
         Symbol* sym = (yyvsp[-2].symbol);
         ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
@@ -2339,13 +2110,39 @@ yyreduce:
         ExprInfo value = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if (target.isValid && value.isValid) {
             checkAssignment(target, value, yylineno);
+
+            if (value.isConst) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(value.iVal)); break;
+                    case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
+                    case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
+                    case BK_String: ctx->fileContent.push_back("        ldc \"" + value.sVal + "\""); break;
+                    default: break;
+                }
+            }
+
+            if (sym->index == -1) {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    default: break;
+                }
+            } else {
+                switch (target.type->base) {
+                    case BK_Int: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Float: ctx->fileContent.push_back("        fstore " + std::to_string(sym->index)); break;
+                    case BK_Bool: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    default: break;                
+                }
+            }
         }
     }
-#line 2345 "src/y.tab.cpp"
+#line 2142 "src/y.tab.cpp"
     break;
 
   case 68: /* return_stmt: RETURN expression SEMICOLON  */
-#line 954 "src/p3_parser.y"
+#line 757 "src/p3_parser.y"
                                   {
         ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
         ctx->returnsExpr.push_back(std::make_pair(expr, yylineno));
@@ -2353,7 +2150,7 @@ yyreduce:
         if (expr.isConst) {
             switch (ctx->funcType->base) {
             case BK_Int:
-                ctx->fileContent.push_back("        sipush " + std::to_string(expr.iVal));
+                ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
                 ctx->fileContent.push_back("        ireturn");
                 break;
             case BK_Float:
@@ -2361,7 +2158,7 @@ yyreduce:
                 ctx->fileContent.push_back("        freturn");
                 break;
             case BK_Bool:
-                ctx->fileContent.push_back("        sipush " + std::string(expr.bVal ? "1" : "0"));
+                ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
                 ctx->fileContent.push_back("        ireturn");
                 break;
             default:
@@ -2369,11 +2166,11 @@ yyreduce:
             }
         }
     }
-#line 2373 "src/y.tab.cpp"
+#line 2170 "src/y.tab.cpp"
     break;
 
   case 69: /* expression: expression PLUS expression  */
-#line 981 "src/p3_parser.y"
+#line 784 "src/p3_parser.y"
                                  {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2384,71 +2181,71 @@ yyreduce:
             if (isStringConcat) {
                 (yyval.expr_info) = concatStringResult(lhs, rhs, ctx->typePool, yylineno);
             } else {
-                (yyval.expr_info) = numericOpResult(OPADD, lhs, rhs, ctx->typePool, yylineno);
+                (yyval.expr_info) = numericOpResult(OPADD, lhs, rhs, ctx, yylineno);
             }
         }
     }
-#line 2392 "src/y.tab.cpp"
+#line 2189 "src/y.tab.cpp"
     break;
 
   case 70: /* expression: expression MINUS expression  */
-#line 995 "src/p3_parser.y"
+#line 798 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
             (yyval.expr_info) = makeInvalidExpr();
         }
         else{
-            (yyval.expr_info) = numericOpResult(OPSUB, lhs, rhs, ctx->typePool, yylineno);
+            (yyval.expr_info) = numericOpResult(OPSUB, lhs, rhs, ctx, yylineno);
         }
     }
-#line 2406 "src/y.tab.cpp"
+#line 2203 "src/y.tab.cpp"
     break;
 
   case 71: /* expression: expression MUL expression  */
-#line 1004 "src/p3_parser.y"
+#line 807 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
             (yyval.expr_info) = makeInvalidExpr();
         }
         else{
-            (yyval.expr_info) = numericOpResult(OPMUL, lhs, rhs, ctx->typePool, yylineno);
+            (yyval.expr_info) = numericOpResult(OPMUL, lhs, rhs, ctx, yylineno);
         }
     }
-#line 2420 "src/y.tab.cpp"
+#line 2217 "src/y.tab.cpp"
     break;
 
   case 72: /* expression: expression DIV expression  */
-#line 1013 "src/p3_parser.y"
+#line 816 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
             (yyval.expr_info) = makeInvalidExpr();
         }
         else{
-            (yyval.expr_info) = numericOpResult(OPDIV, lhs, rhs, ctx->typePool, yylineno);
+            (yyval.expr_info) = numericOpResult(OPDIV, lhs, rhs, ctx, yylineno);
         }
     }
-#line 2434 "src/y.tab.cpp"
+#line 2231 "src/y.tab.cpp"
     break;
 
   case 73: /* expression: expression MOD expression  */
-#line 1022 "src/p3_parser.y"
+#line 825 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
             (yyval.expr_info) = makeInvalidExpr();
         }
         else{
-            (yyval.expr_info) = numericOpResult(OPMOD, lhs, rhs, ctx->typePool, yylineno);
+            (yyval.expr_info) = numericOpResult(OPMOD, lhs, rhs, ctx, yylineno);
         }
     }
-#line 2448 "src/y.tab.cpp"
+#line 2245 "src/y.tab.cpp"
     break;
 
   case 74: /* expression: expression LT expression  */
-#line 1031 "src/p3_parser.y"
+#line 834 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2458,11 +2255,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2462 "src/y.tab.cpp"
+#line 2259 "src/y.tab.cpp"
     break;
 
   case 75: /* expression: expression LE expression  */
-#line 1040 "src/p3_parser.y"
+#line 843 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2472,11 +2269,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2476 "src/y.tab.cpp"
+#line 2273 "src/y.tab.cpp"
     break;
 
   case 76: /* expression: expression GT expression  */
-#line 1049 "src/p3_parser.y"
+#line 852 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2486,11 +2283,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2490 "src/y.tab.cpp"
+#line 2287 "src/y.tab.cpp"
     break;
 
   case 77: /* expression: expression GE expression  */
-#line 1058 "src/p3_parser.y"
+#line 861 "src/p3_parser.y"
                                     { 
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2500,11 +2297,11 @@ yyreduce:
             (yyval.expr_info) = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2504 "src/y.tab.cpp"
+#line 2301 "src/y.tab.cpp"
     break;
 
   case 78: /* expression: expression EQ expression  */
-#line 1068 "src/p3_parser.y"
+#line 871 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2514,11 +2311,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 2518 "src/y.tab.cpp"
+#line 2315 "src/y.tab.cpp"
     break;
 
   case 79: /* expression: expression NEQ expression  */
-#line 1077 "src/p3_parser.y"
+#line 880 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2528,11 +2325,11 @@ yyreduce:
             (yyval.expr_info) = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
         }
     }
-#line 2532 "src/y.tab.cpp"
+#line 2329 "src/y.tab.cpp"
     break;
 
   case 80: /* expression: expression AND expression  */
-#line 1087 "src/p3_parser.y"
+#line 890 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2542,11 +2339,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
         }   
     }
-#line 2546 "src/y.tab.cpp"
+#line 2343 "src/y.tab.cpp"
     break;
 
   case 81: /* expression: expression OR expression  */
-#line 1096 "src/p3_parser.y"
+#line 899 "src/p3_parser.y"
                                     {
         ExprInfo lhs = *(yyvsp[-2].expr_info); ExprInfo rhs = *(yyvsp[0].expr_info); delete (yyvsp[-2].expr_info); delete (yyvsp[0].expr_info);
         if(!lhs.isValid || !rhs.isValid) {
@@ -2556,11 +2353,11 @@ yyreduce:
             (yyval.expr_info) = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
         }
     }
-#line 2560 "src/y.tab.cpp"
+#line 2357 "src/y.tab.cpp"
     break;
 
   case 82: /* expression: NOT expression  */
-#line 1105 "src/p3_parser.y"
+#line 908 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2570,11 +2367,11 @@ yyreduce:
             (yyval.expr_info) = notOpResult(expr, ctx->typePool, yylineno);
         }
     }
-#line 2574 "src/y.tab.cpp"
+#line 2371 "src/y.tab.cpp"
     break;
 
   case 83: /* expression: MINUS expression  */
-#line 1114 "src/p3_parser.y"
+#line 917 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2584,11 +2381,11 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(true, expr, yylineno);
         }
     }
-#line 2588 "src/y.tab.cpp"
+#line 2385 "src/y.tab.cpp"
     break;
 
   case 84: /* expression: PLUS expression  */
-#line 1123 "src/p3_parser.y"
+#line 926 "src/p3_parser.y"
                                     {
         ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
         if(!expr.isValid) {
@@ -2598,65 +2395,43 @@ yyreduce:
             (yyval.expr_info) = unaryOpResult(false, expr, yylineno);
         }
     }
-#line 2602 "src/y.tab.cpp"
+#line 2399 "src/y.tab.cpp"
     break;
 
-  case 85: /* expression: INC expression  */
-#line 1132 "src/p3_parser.y"
-                                    {
-        ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
-        if(!expr.isValid) {
-            (yyval.expr_info) = makeInvalidExpr();
-        }
-        else{
-            (yyval.expr_info) = unaryOpResult(true, expr, yylineno);
-        }
+  case 85: /* expression: INC lvalue  */
+#line 935 "src/p3_parser.y"
+                                {
+        (yyval.expr_info) = checkIncDecValid(true, (yyvsp[0].symbol), ctx, yylineno);
     }
-#line 2616 "src/y.tab.cpp"
+#line 2407 "src/y.tab.cpp"
     break;
 
-  case 86: /* expression: DEC expression  */
-#line 1141 "src/p3_parser.y"
-                                    {
-        ExprInfo expr = *(yyvsp[0].expr_info); delete (yyvsp[0].expr_info);
-        if(!expr.isValid) {
-            (yyval.expr_info) = makeInvalidExpr();
-        }
-        else{
-            (yyval.expr_info) = unaryOpResult(false, expr, yylineno);
-        }
+  case 86: /* expression: DEC lvalue  */
+#line 938 "src/p3_parser.y"
+                                {
+        (yyval.expr_info) = checkIncDecValid(false, (yyvsp[0].symbol), ctx, yylineno);
     }
-#line 2630 "src/y.tab.cpp"
+#line 2415 "src/y.tab.cpp"
     break;
 
-  case 87: /* expression: expression INC  */
-#line 1150 "src/p3_parser.y"
-                                   {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        if (!expr.isValid) {
-            (yyval.expr_info) = makeInvalidExpr();
-        } else {
-            (yyval.expr_info) = unaryOpResult(true, expr, yylineno); // true 表示 ++
-        }
+  case 87: /* expression: lvalue INC  */
+#line 941 "src/p3_parser.y"
+                               {
+        (yyval.expr_info) = checkIncDecValid(true, (yyvsp[-1].symbol), ctx, yylineno);
     }
-#line 2643 "src/y.tab.cpp"
+#line 2423 "src/y.tab.cpp"
     break;
 
-  case 88: /* expression: expression DEC  */
-#line 1158 "src/p3_parser.y"
-                                   {
-        ExprInfo expr = *(yyvsp[-1].expr_info); delete (yyvsp[-1].expr_info);
-        if (!expr.isValid) {
-            (yyval.expr_info) = makeInvalidExpr();
-        } else {
-            (yyval.expr_info) = unaryOpResult(false, expr, yylineno); // false 表示 --
-        }
+  case 88: /* expression: lvalue DEC  */
+#line 944 "src/p3_parser.y"
+                               {
+        (yyval.expr_info) = checkIncDecValid(false, (yyvsp[-1].symbol), ctx, yylineno);
     }
-#line 2656 "src/y.tab.cpp"
+#line 2431 "src/y.tab.cpp"
     break;
 
   case 89: /* expression: LPAREN expression RPAREN  */
-#line 1166 "src/p3_parser.y"
+#line 947 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[-1].expr_info)->isValid) {
             delete (yyvsp[-1].expr_info);
@@ -2665,11 +2440,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[-1].expr_info);
         }
     }
-#line 2669 "src/y.tab.cpp"
+#line 2444 "src/y.tab.cpp"
     break;
 
   case 90: /* expression: lvalue  */
-#line 1174 "src/p3_parser.y"
+#line 955 "src/p3_parser.y"
                                      {
         Symbol* sym = (yyvsp[0].symbol);
         ExprInfo *exprPtr = (sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr();
@@ -2701,11 +2476,11 @@ yyreduce:
             }
         }
     }
-#line 2705 "src/y.tab.cpp"
+#line 2480 "src/y.tab.cpp"
     break;
 
   case 91: /* expression: const_lit  */
-#line 1205 "src/p3_parser.y"
+#line 986 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2714,11 +2489,11 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2718 "src/y.tab.cpp"
+#line 2493 "src/y.tab.cpp"
     break;
 
   case 92: /* expression: func_call  */
-#line 1213 "src/p3_parser.y"
+#line 994 "src/p3_parser.y"
                                      { 
         if (!(yyvsp[0].expr_info)->isValid) {
             delete (yyvsp[0].expr_info);
@@ -2727,48 +2502,48 @@ yyreduce:
             (yyval.expr_info) = (yyvsp[0].expr_info);
         }
     }
-#line 2731 "src/y.tab.cpp"
+#line 2506 "src/y.tab.cpp"
     break;
 
   case 93: /* const_lit: INT_LIT  */
-#line 1225 "src/p3_parser.y"
+#line 1006 "src/p3_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Int), true);
         (yyval.expr_info)->setInt((yyvsp[0].ival));
     }
-#line 2740 "src/y.tab.cpp"
+#line 2515 "src/y.tab.cpp"
     break;
 
   case 94: /* const_lit: REAL_LIT  */
-#line 1229 "src/p3_parser.y"
+#line 1010 "src/p3_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Float), true);
         (yyval.expr_info)->setFloat((yyvsp[0].fval));
     }
-#line 2749 "src/y.tab.cpp"
+#line 2524 "src/y.tab.cpp"
     break;
 
   case 95: /* const_lit: BOOL_LIT  */
-#line 1233 "src/p3_parser.y"
+#line 1014 "src/p3_parser.y"
                   {
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_Bool), true);
         (yyval.expr_info)->setBool((yyvsp[0].bval));
     }
-#line 2758 "src/y.tab.cpp"
+#line 2533 "src/y.tab.cpp"
     break;
 
   case 96: /* const_lit: STRING_LIT  */
-#line 1237 "src/p3_parser.y"
+#line 1018 "src/p3_parser.y"
                   { 
         (yyval.expr_info) = new ExprInfo(ctx->typePool.make(BK_String), true);
         (yyval.expr_info)->setString(*(yyvsp[0].sval));
         delete (yyvsp[0].sval);
     }
-#line 2768 "src/y.tab.cpp"
+#line 2543 "src/y.tab.cpp"
     break;
 
   case 97: /* func_call: ID LPAREN arg_list_opt RPAREN  */
-#line 1246 "src/p3_parser.y"
+#line 1027 "src/p3_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2790,11 +2565,11 @@ yyreduce:
             (yyval.expr_info) = makeInvalidExpr();
         }
     }
-#line 2794 "src/y.tab.cpp"
+#line 2569 "src/y.tab.cpp"
     break;
 
   case 98: /* proc_call: ID LPAREN arg_list_opt RPAREN  */
-#line 1269 "src/p3_parser.y"
+#line 1050 "src/p3_parser.y"
                                     {
         Symbol* symbol = ctx->symTab.lookup(*(yyvsp[-3].sval));
         std::string funcName = *(yyvsp[-3].sval); delete (yyvsp[-3].sval);
@@ -2808,67 +2583,67 @@ yyreduce:
             SemanticError("undeclared function: " + funcName, yylineno);
         }
     }
-#line 2812 "src/y.tab.cpp"
+#line 2587 "src/y.tab.cpp"
     break;
 
   case 99: /* arg_list_opt: %empty  */
-#line 1285 "src/p3_parser.y"
+#line 1066 "src/p3_parser.y"
                  { (yyval.expr_info_list) = new std::vector<ExprInfo>();}
-#line 2818 "src/y.tab.cpp"
+#line 2593 "src/y.tab.cpp"
     break;
 
   case 100: /* arg_list_opt: arg_list  */
-#line 1286 "src/p3_parser.y"
+#line 1067 "src/p3_parser.y"
                { (yyval.expr_info_list) = (yyvsp[0].expr_info_list); }
-#line 2824 "src/y.tab.cpp"
+#line 2599 "src/y.tab.cpp"
     break;
 
   case 101: /* arg_list: expression  */
-#line 1290 "src/p3_parser.y"
+#line 1071 "src/p3_parser.y"
                  {
         (yyval.expr_info_list) = new std::vector<ExprInfo>();
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2834 "src/y.tab.cpp"
+#line 2609 "src/y.tab.cpp"
     break;
 
   case 102: /* arg_list: arg_list COMMA expression  */
-#line 1295 "src/p3_parser.y"
+#line 1076 "src/p3_parser.y"
                                {
         (yyval.expr_info_list) = (yyvsp[-2].expr_info_list);
         (yyval.expr_info_list)->push_back(*(yyvsp[0].expr_info));
         delete (yyvsp[0].expr_info);
     }
-#line 2844 "src/y.tab.cpp"
+#line 2619 "src/y.tab.cpp"
     break;
 
   case 103: /* type_spec: INT_TOK  */
-#line 1304 "src/p3_parser.y"
+#line 1085 "src/p3_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_Int); ctx->nowType = (yyval.type); }
-#line 2850 "src/y.tab.cpp"
+#line 2625 "src/y.tab.cpp"
     break;
 
   case 104: /* type_spec: FLOAT_TOK  */
-#line 1305 "src/p3_parser.y"
+#line 1086 "src/p3_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Float); ctx->nowType = (yyval.type); }
-#line 2856 "src/y.tab.cpp"
+#line 2631 "src/y.tab.cpp"
     break;
 
   case 105: /* type_spec: BOOL_TOK  */
-#line 1306 "src/p3_parser.y"
+#line 1087 "src/p3_parser.y"
                      { (yyval.type) = ctx->typePool.make(BK_Bool);  ctx->nowType = (yyval.type); }
-#line 2862 "src/y.tab.cpp"
+#line 2637 "src/y.tab.cpp"
     break;
 
   case 106: /* type_spec: STRING_TOK  */
-#line 1307 "src/p3_parser.y"
+#line 1088 "src/p3_parser.y"
                  { (yyval.type) = ctx->typePool.make(BK_String); ctx->nowType = (yyval.type);}
-#line 2868 "src/y.tab.cpp"
+#line 2643 "src/y.tab.cpp"
     break;
 
 
-#line 2872 "src/y.tab.cpp"
+#line 2647 "src/y.tab.cpp"
 
       default: break;
     }
@@ -3061,7 +2836,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1310 "src/p3_parser.y"
+#line 1091 "src/p3_parser.y"
  
 
 int main(int argc, char* argv[]) {

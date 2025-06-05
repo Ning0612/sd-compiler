@@ -1,6 +1,7 @@
 #include "SemanticAnalyzer.hpp"
 #include <stdexcept>
-#include <algorithm> 
+#include <algorithm>
+#include <cmath>
 
 // convert ExprInfo to basic types
 int toInt(const ExprInfo e){
@@ -64,7 +65,8 @@ ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena
 }
 
 /*───────── numeric (+ - * / %) ─────────*/
-ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno){
+ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno){
+    TypeArena& pool = ctx->typePool;
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
     if(!lhs.isValid || !rhs.isValid){
         return makeInvalidExpr();
@@ -82,11 +84,6 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
 
     if(!(isBaseCompatible(b1, b2))){
         SemanticError("numeric type mismatch " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
-        return makeInvalidExpr();
-    }
-
-    if(op==OPMOD && (b1!=BK_Int||b2!=BK_Int)){
-        SemanticError("modulus type must be int but got " + baseKindToStr(b1) + numOpToStr(op) + baseKindToStr(b2), lineno);
         return makeInvalidExpr();
     }
 
@@ -115,13 +112,55 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Ty
         if(resultBase==BK_Float){
             float a=toFloat(lhs), b=toFloat(rhs);
             float r = (op==OPADD)?a+b : (op==OPSUB)?a-b :
-                      (op==OPMUL)?a*b : (op==OPDIV)?a/b : a; // no mod
+                      (op==OPMUL)?a*b : (op==OPDIV)?a/b : std::fmod(a, b);
             result->setFloat(r);
         }else if(resultBase==BK_Int){
             int a=lhs.getInt(), b=rhs.getInt();
             int r = (op==OPADD)?a+b : (op==OPSUB)?a-b :
                     (op==OPMUL)?a*b : (op==OPDIV)?a/b : a%b;
             result->setInt(r);
+        }
+    }else{
+        if (lhs.isConst){
+            switch (b1) {
+                case BK_Int:    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getInt())); break;
+                case BK_Float:  ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getFloat()) + "f"); break;
+                default: break; // no other types
+            }
+            ctx->fileContent.push_back("        swap");
+        }
+
+        if (rhs.isConst){
+            switch (b2) {
+                case BK_Int:    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getInt())); break;
+                case BK_Float:  ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getFloat()) + "f"); break;
+                default: break; // no other types
+            }
+        }
+
+        switch (resultBase) {
+            case BK_Int:
+                switch (op) {
+                    case OPADD: ctx->fileContent.push_back("        iadd"); break;
+                    case OPSUB: ctx->fileContent.push_back("        isub"); break;
+                    case OPMUL: ctx->fileContent.push_back("        imul"); break;
+                    case OPDIV: ctx->fileContent.push_back("        idiv"); break;
+                    case OPMOD: ctx->fileContent.push_back("        irem"); break;
+
+                }
+                break;
+
+            case BK_Float:
+                switch (op) {
+                    case OPADD: ctx->fileContent.push_back("        fadd"); break;
+                    case OPSUB: ctx->fileContent.push_back("        fsub"); break;
+                    case OPMUL: ctx->fileContent.push_back("        fmul"); break;
+                    case OPDIV: ctx->fileContent.push_back("        fdiv"); break;
+                    case OPMOD: ctx->fileContent.push_back("        fmod"); break; 
+                }
+                break;
+            default:
+                return makeInvalidExpr();
         }
     }
 
@@ -298,6 +337,71 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
     return result;
 }
 
+/*───────── check is the expression a INC or DEC ─────────*/
+// true for increment, false for decrement
+ExprInfo *checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno) {
+    ExprInfo *exprPtr = ((sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr());
+    ExprInfo expr = *exprPtr; delete exprPtr;
+    std::string opStr = (op ? "++" : "--");
+
+    if (!expr.isValid) {
+        return makeInvalidExpr();
+    }
+
+    if (expr.isConst){
+        SemanticError(op + " cannot be applied to const", lineno);
+        return makeInvalidExpr();
+    }
+
+    if (!expr.type->isScalar()){
+        SemanticError(op + " cannot be applied to non-scalar type", lineno);
+        return makeInvalidExpr();
+    }
+
+    if (expr.type->base != BK_Int && expr.type->base != BK_Float){
+        SemanticError(op + " requires int/float, got: " + baseKindToStr(expr.type->base), lineno);
+        return makeInvalidExpr();
+    }
+
+    if (sym != nullptr) {
+        if (sym->index == -1) {
+            if (sym->type->base == BK_Int) {
+                ctx->fileContent.push_back("        getstatic int " + sym->name);
+                ctx->fileContent.push_back("        ldc 1");
+                ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
+                ctx->fileContent.push_back("        putstatic int " + sym->name);
+                ctx->fileContent.push_back("        getstatic int " + sym->name);
+
+            } else if (sym->type->base == BK_Float) {
+                ctx->fileContent.push_back("        getstatic float " + sym->name);
+                ctx->fileContent.push_back("        ldc 1.0f");
+                ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
+                ctx->fileContent.push_back("        putstatic float " + sym->name);
+                ctx->fileContent.push_back("        getstatic float " + sym->name);
+            }
+        }
+        else {
+            if (sym->type->base == BK_Int) {
+                ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                ctx->fileContent.push_back("        ldc 1");
+                ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
+                ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+                ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+
+            } else if (sym->type->base == BK_Float) {
+                ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                ctx->fileContent.push_back("        ldc 1.0f");
+                ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
+                ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
+                ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+            }
+        }
+
+        return  sym->getExprInfo();
+    }
+    return makeInvalidExpr();
+}
+
 /*───────── check is the expression a bool scalar ─────────*/
 void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno) {
     if (!expr.isValid) {
@@ -306,28 +410,6 @@ void checkBoolExpr(const std::string& context, const ExprInfo& expr, int lineno)
 
     if (expr.type->base != BK_Bool || !expr.type->isScalar()) {
         SemanticError(context + " condition must be bool scalar", lineno);
-        return;
-    }
-}
-
-/*───────── check is the expression a numeric scalar ─────────*/
-void checkIncDecValid(const std::string& op, const ExprInfo& expr, int lineno) {
-    if (!expr.isValid) {
-        return;
-    }
-
-    if (expr.isConst){
-        SemanticError(op + " cannot be applied to const", lineno);
-        return;
-    }
-
-    if (!expr.type->isScalar()){
-        SemanticError(op + " cannot be applied to non-scalar type", lineno);
-        return;
-    }
-
-    if (expr.type->base != BK_Int && expr.type->base != BK_Float){
-        SemanticError(op + " requires int/float, got: " + baseKindToStr(expr.type->base), lineno);
         return;
     }
 }

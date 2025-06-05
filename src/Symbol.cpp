@@ -43,10 +43,6 @@ void Symbol::setConstValueFromExpr(const ExprInfo* e) {
     }
 }
 
-void Symbol::setExprInfo(ExprInfo* expr) {
-
-    delete expr; // Avoid memory leak if not used
-}
 
 // Get the expression information for the symbol
 ExprInfo* Symbol::getExprInfo() const {
