@@ -1,21 +1,14 @@
-int add(int a, int b){
-    return a + b;
-}
-
+// This is a variable foreach
 
 void main(){
-    int i;
-    foreach(i : 1. .10){
-        print i;
-        print " ";
+    int a, i, j;
+    a = 9;
+
+    foreach (i : 0 .. a) {
+        foreach (j : 0 .. i) {
+            print i;
+            print " ";
+        }
+        println "";
     }
-    println "";
-
-    int c;
-    i++;
-    c = ++i;
-
-    c = add(3, 5);
-
-
 }

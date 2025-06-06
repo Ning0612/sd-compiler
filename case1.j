@@ -4,84 +4,100 @@ class case1
     max_stack 31
     max_locals 31
     {
-        ldc 1
-        istore 0
-        iload 0
-        ldc 1
-        isub
-        ifeq E0
+        ldc 0.000000f
+        fstore 0
+        ldc 0.000000f
+        fstore 1
+        ldc 0.000000f
+        fstore 2
+        ldc 1.500000f
+        fstore 0
+        ldc 2.500000f
+        fstore 1
+        fload 0
+        fload 1
+        fadd
+        fstore 2
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "a = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "b = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 1
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "Sum of a and b = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fadd
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.print(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "Difference of a and b = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fsub
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "Product of a and b = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fmul
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "Quotient of a and b = "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fdiv
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(float)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "a > b: "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fcmpl
+        ifgt C0
         iconst_0
-        goto E1
-E0:
+        goto C1
+C0:
         iconst_1
-E1:
-        ifeq FFalse0
-        goto FExit0
-FFalse0:
-        nop
-        iload 0
-        ldc 2
-        isub
-        ifeq E2
+C1:
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(boolean)
+        getstatic java.io.PrintStream java.lang.System.out
+        ldc "a < b: "
+        invokevirtual void java.io.PrintStream.print(java.lang.String)
+        fload 0
+        fload 1
+        fcmpl
+        iflt C2
         iconst_0
-        goto E3
-E2:
+        goto C3
+C2:
         iconst_1
-E3:
-        ifeq FFalse1
-        goto FExit1
-FFalse1:
-        nop
-        iload 0
-        ldc 3
-        isub
-        ifeq E4
-        iconst_0
-        goto E5
-E4:
-        iconst_1
-E5:
-        ifeq FFalse2
-        goto FExit2
-FFalse2:
-        nop
-        iload 0
-        ldc 4
-        isub
-        ifeq E6
-        iconst_0
-        goto E7
-E6:
-        iconst_1
-E7:
-        ifeq FFalse3
-        goto FExit3
-FFalse3:
-        nop
-        iload 0
-        ldc 5
-        isub
-        ifeq E8
-        iconst_0
-        goto E9
-E8:
-        iconst_1
-E9:
-        ifeq FFalse4
-        ldc 7
-        istore 1
-        ldc 0
-        istore 2
-FFalse4:
-        nop
-FExit3:
-        nop
-FExit2:
-        nop
-FExit1:
-        nop
-FExit0:
-        nop
+C3:
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.println(boolean)
        return
     }
 

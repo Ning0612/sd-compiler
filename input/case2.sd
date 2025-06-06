@@ -1,33 +1,11 @@
-// Test for
-// - Function declaration and return type checking
-// - Function call argument type and count matching
-// - Array argument dimension size checking
-// - Variable name conflict with function
-// - Implicit type conversions (int <-> float)
+// String concatenation example
 
-int add(int a, int b) {
-    return a + b;
-}
-
-float multiply(float a, float b) {
-    return a * b;
-}
-
-void main() {
-    int a = 5;
-    int b = 10;
-    float c = 2.5;
-    float d = 4.0;
-
-    // Function calls
-    int sumInt;
-    float sumDouble;
-
-    sumInt = add(a, b);             // Valid call
-
-    // Multiplication
-    float product;
-    product = multiply(c, d);       // Valid call
-    print "Product: ";
-    println product;
+void main(){
+    const string str1 = "Hello";
+    const string str2 = "World";
+    const string str3 = str1 + " " + str2;
+    println str1;
+    println str2;
+    println str3;
+    println "Concatenated String: " + str3;
 }

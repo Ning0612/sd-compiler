@@ -118,6 +118,10 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Co
         SemanticWarning("implicit conversion from " + baseKindToStr(b2) + " to " + baseKindToStr(resultBase), lineno);
     }
 
+    if (resultBase == BK_Float && op == OPMOD) {
+        SemanticError("modulus operator (%) is not defined for float type", lineno);
+    }
+
     if(isConst){
         if(resultBase==BK_Float){
             float a=toFloat(lhs), b=toFloat(rhs);
@@ -555,7 +559,7 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, Context* ctx, int li
 
 /*───────── check is the expression a INC or DEC ─────────*/
 // true for increment, false for decrement
-ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std::vector<std::string>* fileContent, int lineno) {
+ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std::vector<std::string>* fileContent, std::string baseName, int lineno) {
     ExprInfo *exprPtr = ((sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr());
     ExprInfo expr = *exprPtr; delete exprPtr;
     std::string opStr = (op ? "++" : "--");
@@ -582,18 +586,18 @@ ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std:
     if (sym != nullptr) {
         if (sym->index == -1) {
             if (sym->type->base == BK_Int) {
-                fileContent->push_back("        getstatic int " + sym->name);
+                fileContent->push_back("        getstatic int " + baseName + "." + sym->name);
                 fileContent->push_back("        ldc 1");
                 fileContent->push_back((op ? "        iadd" : "        isub"));
-                fileContent->push_back("        putstatic int " + sym->name);
-                if (relood) fileContent->push_back("        getstatic int " + sym->name);
+                fileContent->push_back("        putstatic int " + baseName + sym->name);
+                if (relood) fileContent->push_back("        getstatic int " + baseName + "." + sym->name);
 
             } else if (sym->type->base == BK_Float) {
-                fileContent->push_back("        getstatic float " + sym->name);
+                fileContent->push_back("        getstatic float " + baseName + sym->name);
                 fileContent->push_back("        ldc 1.0f");
                 fileContent->push_back((op ? "        fadd" : "        fsub"));
                 fileContent->push_back("        putstatic float " + sym->name);
-                if (relood) fileContent->push_back("        getstatic float " + sym->name);
+                if (relood) fileContent->push_back("        getstatic float " + baseName + sym->name);
             }
         }
         else {

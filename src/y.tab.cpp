@@ -1784,7 +1784,7 @@ yyreduce:
   case 43: /* simple_stmt: lvalue INC SEMICOLON  */
 #line 445 "src/p3_parser.y"
                            {
-        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(true, false, (yyvsp[-2].symbol), &ctx->fileContent, yylineno);
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(true, false, (yyvsp[-2].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 1790 "src/y.tab.cpp"
     break;
@@ -1792,7 +1792,7 @@ yyreduce:
   case 44: /* simple_stmt: lvalue DEC SEMICOLON  */
 #line 448 "src/p3_parser.y"
                            {
-        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(false, false, (yyvsp[-2].symbol), &ctx->fileContent, yylineno);
+        if ((yyvsp[-2].symbol) != nullptr) delete checkIncDecValid(false, false, (yyvsp[-2].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 1798 "src/y.tab.cpp"
     break;
@@ -1800,7 +1800,7 @@ yyreduce:
   case 45: /* simple_stmt: INC lvalue SEMICOLON  */
 #line 451 "src/p3_parser.y"
                            {
-        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(true, false, (yyvsp[-1].symbol), &ctx->fileContent, yylineno);
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(true, false, (yyvsp[-1].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 1806 "src/y.tab.cpp"
     break;
@@ -1808,7 +1808,7 @@ yyreduce:
   case 46: /* simple_stmt: DEC lvalue SEMICOLON  */
 #line 454 "src/p3_parser.y"
                            {
-        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(false, false, (yyvsp[-1].symbol), &ctx->fileContent, yylineno);
+        if ((yyvsp[-1].symbol) != nullptr) delete checkIncDecValid(false, false, (yyvsp[-1].symbol), &ctx->fileContent, ctx->baseName, yylineno);
     }
 #line 1814 "src/y.tab.cpp"
     break;
@@ -1834,9 +1834,9 @@ yyreduce:
 
             if (sym->index == -1) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
-                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
-                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + ctx->baseName + "." + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
                     default: break;
                 }
             } else {
@@ -2045,7 +2045,7 @@ yyreduce:
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + toSym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + toSym->name);
         }
 
         // 2. 初始化迴圈變數 (id = from)
@@ -2061,7 +2061,7 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + sym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name);
         }
 
         // 3. 計算 delta (from < to ? 1 : -1)
@@ -2069,13 +2069,13 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "."+ toSym->name);
         }
 
         ctx->fileContent.push_back("        isub");  // from - to
@@ -2091,7 +2091,7 @@ yyreduce:
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + deltaSym->name);
         }
 
         // 4. 迴圈開始
@@ -2104,7 +2104,7 @@ yyreduce:
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "."+ deltaSym->name);
         }
         
         ctx->fileContent.push_back("        ifgt ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter));
@@ -2113,13 +2113,13 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + toSym->name);
         }
         
         ctx->fileContent.push_back("        isub");  // current - to
@@ -2132,13 +2132,13 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + toSym->name);
         }
         
         ctx->fileContent.push_back("        isub");  // current - to
@@ -2170,14 +2170,14 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         // 載入 delta
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + deltaSym->name);
         }
         
         ctx->fileContent.push_back("        iadd");  // current + delta
@@ -2186,7 +2186,7 @@ yyreduce:
         if (sym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + sym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name);
         }
     }
     
@@ -2261,7 +2261,7 @@ yyreduce:
   case 72: /* for_simple_item: lvalue INC  */
 #line 838 "src/p3_parser.y"
                  {
-        if ((yyvsp[-1].symbol) != nullptr)  delete checkIncDecValid(true, false, (yyvsp[-1].symbol), &ctx->forOpContent, yylineno);
+        if ((yyvsp[-1].symbol) != nullptr)  delete checkIncDecValid(true, false, (yyvsp[-1].symbol), &ctx->forOpContent, ctx->baseName, yylineno);
      }
 #line 2267 "src/y.tab.cpp"
     break;
@@ -2269,7 +2269,7 @@ yyreduce:
   case 73: /* for_simple_item: lvalue DEC  */
 #line 841 "src/p3_parser.y"
                  {
-        if ((yyvsp[-1].symbol) != nullptr)  delete checkIncDecValid(false, false, (yyvsp[-1].symbol), &ctx->forOpContent, yylineno);
+        if ((yyvsp[-1].symbol) != nullptr)  delete checkIncDecValid(false, false, (yyvsp[-1].symbol), &ctx->forOpContent, ctx->baseName, yylineno);
      }
 #line 2275 "src/y.tab.cpp"
     break;
@@ -2277,7 +2277,7 @@ yyreduce:
   case 74: /* for_simple_item: INC lvalue  */
 #line 844 "src/p3_parser.y"
                  {
-        if ((yyvsp[0].symbol) != nullptr)  delete checkIncDecValid(true, false, (yyvsp[0].symbol), &ctx->forOpContent, yylineno);
+        if ((yyvsp[0].symbol) != nullptr)  delete checkIncDecValid(true, false, (yyvsp[0].symbol), &ctx->forOpContent, ctx->baseName, yylineno);
      }
 #line 2283 "src/y.tab.cpp"
     break;
@@ -2285,7 +2285,7 @@ yyreduce:
   case 75: /* for_simple_item: DEC lvalue  */
 #line 847 "src/p3_parser.y"
                  {
-        if ((yyvsp[0].symbol) != nullptr)  delete checkIncDecValid(false, false, (yyvsp[0].symbol), &ctx->forOpContent, yylineno);
+        if ((yyvsp[0].symbol) != nullptr)  delete checkIncDecValid(false, false, (yyvsp[0].symbol), &ctx->forOpContent, ctx->baseName, yylineno);
     }
 #line 2291 "src/y.tab.cpp"
     break;
@@ -2312,9 +2312,9 @@ yyreduce:
 
             if (sym->index == -1) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
-                    case BK_Float: ctx->forOpContent.push_back("        putstatic float " + sym->name); break;
-                    case BK_Bool: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Int: ctx->forOpContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
+                    case BK_Float: ctx->forOpContent.push_back("        putstatic float " + ctx->baseName + "." + sym->name); break;
+                    case BK_Bool: ctx->forOpContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
                     default: break;
                 }
             } else {
@@ -2580,7 +2580,7 @@ yyreduce:
   case 94: /* expression: INC lvalue  */
 #line 1058 "src/p3_parser.y"
                                 {
-        (yyval.expr_info) = checkIncDecValid(true, true, (yyvsp[0].symbol), &ctx->fileContent, yylineno);
+        (yyval.expr_info) = checkIncDecValid(true, true, (yyvsp[0].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 2586 "src/y.tab.cpp"
     break;
@@ -2588,7 +2588,7 @@ yyreduce:
   case 95: /* expression: DEC lvalue  */
 #line 1061 "src/p3_parser.y"
                                 {
-        (yyval.expr_info) = checkIncDecValid(false, true, (yyvsp[0].symbol), &ctx->fileContent, yylineno);
+        (yyval.expr_info) = checkIncDecValid(false, true, (yyvsp[0].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 2594 "src/y.tab.cpp"
     break;
@@ -2596,7 +2596,7 @@ yyreduce:
   case 96: /* expression: lvalue INC  */
 #line 1064 "src/p3_parser.y"
                                {
-        (yyval.expr_info) = checkIncDecValid(true, true, (yyvsp[-1].symbol), &ctx->fileContent, yylineno);
+        (yyval.expr_info) = checkIncDecValid(true, true, (yyvsp[-1].symbol), &ctx->fileContent, ctx->baseName, yylineno);
      }
 #line 2602 "src/y.tab.cpp"
     break;
@@ -2604,7 +2604,7 @@ yyreduce:
   case 97: /* expression: lvalue DEC  */
 #line 1067 "src/p3_parser.y"
                                {
-        (yyval.expr_info) = checkIncDecValid(false, true, (yyvsp[-1].symbol), &ctx->fileContent, yylineno);
+        (yyval.expr_info) = checkIncDecValid(false, true, (yyvsp[-1].symbol), &ctx->fileContent, ctx->baseName, yylineno);
     }
 #line 2610 "src/y.tab.cpp"
     break;
@@ -2639,11 +2639,11 @@ yyreduce:
             if (!sym->isConst){
                 if (sym->index == -1) {
                     if (sym->type->base == BK_Int) {
-                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                        ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
                     } else if (sym->type->base == BK_Float) {
-                        ctx->fileContent.push_back("        getstatic float " + sym->name);
+                        ctx->fileContent.push_back("        getstatic float " + ctx->baseName + "." + sym->name);
                     } else if (sym->type->base == BK_Bool) {
-                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                        ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
                     }
                 } else {
                     if (sym->type->base == BK_Int) {
@@ -2739,7 +2739,7 @@ yyreduce:
                     (yyval.expr_info) = new ExprInfo(symbol->type->ret);
                     std::string call = "        invokestatic ";
                     call += symbol->type->ret->base == BK_Void ? "void " : baseKindToJavaStr(symbol->type->ret->base) + " ";
-                    call += funcName + "(";
+                    call += ctx->baseName + "." + funcName + "(";
                     for (size_t  i = 0; i < args.size(); ++i) {
                         if (i > 0) call += ", ";
                         switch (args[i].type->base) {
@@ -2776,7 +2776,7 @@ yyreduce:
                 SemanticError("function " + funcName + " should get return value", yylineno);
             }else{
                 std::string call = "        invokestatic ";
-                call += "void " + funcName + "(";
+                call += "void " + ctx->baseName + "." + funcName + "(";
                 for (size_t i = 0; i < args.size(); ++i) {
                     if (i > 0) call += ", ";
                     switch (args[i].type->base) {
@@ -3090,6 +3090,8 @@ int main(int argc, char* argv[]) {
     Context context;
     ctx = &context;
 
+    ctx->fileContent.clear();
+    ctx->baseName = baseName;
     ctx->fileContent.push_back("class " + baseName);
     ctx->fileContent.push_back("{");
     int result = yyparse();

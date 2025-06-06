@@ -57,7 +57,7 @@ ExprInfo* notOpResult(const ExprInfo& expr, Context* ctx, int lineno);
 ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, Context* ctx, int lineno);
 
 // Validate ++ or -- target is modifiable and not const
-ExprInfo * checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std::vector<std::string>* fileContent, int lineno);
+ExprInfo * checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std::vector<std::string>* fileContent, std::string baseName, int lineno);
 
 /* ─────────────── Semantic Checks ─────────────── */
 

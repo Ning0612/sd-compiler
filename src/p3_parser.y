@@ -443,16 +443,16 @@ simple_stmt
         SemanticError("read statement not supported in code generation", yylineno);
     }
     | lvalue INC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, &ctx->fileContent, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue DEC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, &ctx->fileContent, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | INC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, &ctx->fileContent, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | DEC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, &ctx->fileContent, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, &ctx->fileContent, ctx->baseName, yylineno);
     }
     | SEMICOLON
     ;
@@ -477,9 +477,9 @@ assign_stmt
 
             if (sym->index == -1) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
-                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
-                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
+                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + ctx->baseName + "." + sym->name); break;
+                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
                     default: break;
                 }
             } else {
@@ -635,7 +635,7 @@ loop_stmt
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + toSym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + toSym->name);
         }
 
         // 2. 初始化迴圈變數 (id = from)
@@ -651,7 +651,7 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + sym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name);
         }
 
         // 3. 計算 delta (from < to ? 1 : -1)
@@ -659,13 +659,13 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "."+ toSym->name);
         }
 
         ctx->fileContent.push_back("        isub");  // from - to
@@ -681,7 +681,7 @@ loop_stmt
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + deltaSym->name);
         }
 
         // 4. 迴圈開始
@@ -694,7 +694,7 @@ loop_stmt
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "."+ deltaSym->name);
         }
         
         ctx->fileContent.push_back("        ifgt ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter));
@@ -703,13 +703,13 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + toSym->name);
         }
         
         ctx->fileContent.push_back("        isub");  // current - to
@@ -722,13 +722,13 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         if (toSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + toSym->name);
         }
         
         ctx->fileContent.push_back("        isub");  // current - to
@@ -754,14 +754,14 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
         }
         
         // 載入 delta
         if (deltaSym->index != -1) {
             ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + deltaSym->name);
         }
         
         ctx->fileContent.push_back("        iadd");  // current + delta
@@ -770,7 +770,7 @@ loop_stmt
         if (sym->index != -1) {
             ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
         } else {
-            ctx->fileContent.push_back("        putstatic int " + sym->name);
+            ctx->fileContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name);
         }
     }
     
@@ -836,16 +836,16 @@ for_simple_item
         if (expr.isValid) checkRead(expr, yylineno);
     }
     | lvalue INC {
-        if ($1 != nullptr)  delete checkIncDecValid(true, false, $1, &ctx->forOpContent, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(true, false, $1, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | lvalue DEC {
-        if ($1 != nullptr)  delete checkIncDecValid(false, false, $1, &ctx->forOpContent, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(false, false, $1, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | INC lvalue {
-        if ($2 != nullptr)  delete checkIncDecValid(true, false, $2, &ctx->forOpContent, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(true, false, $2, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | DEC lvalue {
-        if ($2 != nullptr)  delete checkIncDecValid(false, false, $2, &ctx->forOpContent, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(false, false, $2, &ctx->forOpContent, ctx->baseName, yylineno);
     }
     ;
 
@@ -870,9 +870,9 @@ assign_no_semi
 
             if (sym->index == -1) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
-                    case BK_Float: ctx->forOpContent.push_back("        putstatic float " + sym->name); break;
-                    case BK_Bool: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Int: ctx->forOpContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
+                    case BK_Float: ctx->forOpContent.push_back("        putstatic float " + ctx->baseName + "." + sym->name); break;
+                    case BK_Bool: ctx->forOpContent.push_back("        putstatic int " + ctx->baseName + "." + sym->name); break;
                     default: break;
                 }
             } else {
@@ -1056,16 +1056,16 @@ expression
         }
     }
     | INC lvalue %prec INC      {
-        $$ = checkIncDecValid(true, true, $2, &ctx->fileContent, yylineno);
+        $$ = checkIncDecValid(true, true, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | DEC lvalue %prec DEC      {
-        $$ = checkIncDecValid(false, true, $2, &ctx->fileContent, yylineno);
+        $$ = checkIncDecValid(false, true, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue INC %prec POSTINC {
-        $$ = checkIncDecValid(true, true, $1, &ctx->fileContent, yylineno);
+        $$ = checkIncDecValid(true, true, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue DEC %prec POSTDEC {
-        $$ = checkIncDecValid(false, true, $1, &ctx->fileContent, yylineno);
+        $$ = checkIncDecValid(false, true, $1, &ctx->fileContent, ctx->baseName, yylineno);
     }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {
@@ -1090,11 +1090,11 @@ expression
             if (!sym->isConst){
                 if (sym->index == -1) {
                     if (sym->type->base == BK_Int) {
-                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                        ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
                     } else if (sym->type->base == BK_Float) {
-                        ctx->fileContent.push_back("        getstatic float " + sym->name);
+                        ctx->fileContent.push_back("        getstatic float " + ctx->baseName + "." + sym->name);
                     } else if (sym->type->base == BK_Bool) {
-                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                        ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "." + sym->name);
                     }
                 } else {
                     if (sym->type->base == BK_Int) {
@@ -1163,7 +1163,7 @@ func_call
                     $$ = new ExprInfo(symbol->type->ret);
                     std::string call = "        invokestatic ";
                     call += symbol->type->ret->base == BK_Void ? "void " : baseKindToJavaStr(symbol->type->ret->base) + " ";
-                    call += funcName + "(";
+                    call += ctx->baseName + "." + funcName + "(";
                     for (size_t  i = 0; i < args.size(); ++i) {
                         if (i > 0) call += ", ";
                         switch (args[i].type->base) {
@@ -1197,7 +1197,7 @@ proc_call
                 SemanticError("function " + funcName + " should get return value", yylineno);
             }else{
                 std::string call = "        invokestatic ";
-                call += "void " + funcName + "(";
+                call += "void " + ctx->baseName + "." + funcName + "(";
                 for (size_t i = 0; i < args.size(); ++i) {
                     if (i > 0) call += ", ";
                     switch (args[i].type->base) {
@@ -1285,6 +1285,8 @@ int main(int argc, char* argv[]) {
     Context context;
     ctx = &context;
 
+    ctx->fileContent.clear();
+    ctx->baseName = baseName;
     ctx->fileContent.push_back("class " + baseName);
     ctx->fileContent.push_back("{");
     int result = yyparse();

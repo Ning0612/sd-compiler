@@ -18,10 +18,10 @@ class example
         ldc 0
         istore 0
         ldc 5
-        putstatic int a
-        getstatic int a
+        putstatic int example.a
+        getstatic int example.a
         ldc 10
-        invokestatic int add(int, int)
+        invokestatic int example.add(int, int)
         istore 0
         iload 0
         ldc 10

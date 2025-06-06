@@ -1,9 +1,8 @@
 void main(){
     int a;
+    a = 1;
 
-    a = ++a;
-    a = a++;
+    print a++;
+    print ++a;
 
-    a++;
-    ++a;
 }

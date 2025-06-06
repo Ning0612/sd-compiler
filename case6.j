@@ -6,26 +6,24 @@ class case6
     {
         ldc 0
         istore 0
-        iload 0
         ldc 1
-        iadd
-        istore 0
-        iload 0
-        istore 0
-        iload 0
-        ldc 1
-        iadd
-        istore 0
-        iload 0
         istore 0
         iload 0
         ldc 1
         iadd
         istore 0
         iload 0
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.print(int)
+        iload 0
         ldc 1
         iadd
         istore 0
+        iload 0
+        getstatic java.io.PrintStream java.lang.System.out
+        swap
+        invokevirtual void java.io.PrintStream.print(int)
        return
     }
 

@@ -1,45 +1,34 @@
-// Test for 
-// Constant folding
-// Implicit conversions 
-// String concatenation
-// Division-by-zero errors
+// Float arithmetic operations and comparisons
 
 void main(){
-    int condition = 1;
+    float a;
+    float b;
+    float c;
 
-    // Test 1: Integer constant folding
-    if (condition == 1) {
-        const int a = 1 + 2 * 3;                                // 7
-        const int b = a + 5 - 2;                                // 10
-        const int c = -((5 + 3) * 20 + -3 - -5 + 20 % 3) / 5;    // -32
-    }
+    a = 1.5;
+    b = 2.5;
+    c = a + b;
 
-    // Test 2: Float constant folding and implicit type conversion (double -> float)
-    else if (condition == 2) {
-        const float a = 1.5 + 2.5;                              // 4.0
-        const float b = a * 2;                                  // 8.0
-        const float c = -((5.0 + 3.0) * 20.0 + -3.0 - -5.0) / 5; // -32.4
-        // Warning: implicit conversion from double to float
-    }
+    print "a = ";
+    println a;
+    print "b = ";
+    println b;
 
-    // Test 3: Boolean logic folding
-    else if (condition == 3) {
-        const bool a = true || false;                          // true
-        const bool b = a && false;                             // false
-        const bool c = !a || b;                                // false
-    }
+    print "Sum of a and b = ";
+    print a + b;
+    
+    print "Difference of a and b = ";
+    println a - b;
 
-    // Test 5: String constant folding via concatenation
-    else if (condition == 4) {
-        const string a = "Test" + " Case";                     // "Test Case"
-        const string b = a + " is valid";                      // "Test Case is valid"
-        const string c = b + " !";                             // "Test Case is valid !"
-    }
+    print "Product of a and b = ";
+    println a * b;
 
-    // Test 6: Runtime variables and illegal constant expressions (division/mod by zero)
-    else if (condition == 5) {
-        int a = 1 + 2 * 3;
-        const int zc = 0;
-        int z = 0;
-    }
+    print "Quotient of a and b = ";
+    println a / b;
+
+    print "a > b: ";
+    println a > b;
+
+    print "a < b: ";
+    println a < b;
 }

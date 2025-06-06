@@ -6,6 +6,7 @@
 #include <vector>
 
 struct Context {
+    std::string baseName; // Name of the source file being processed
     SymbolTable symTab;
     TypeArena typePool;
     std::vector<std::pair<ExprInfo, int>> returnsExpr;

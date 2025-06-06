@@ -15,4 +15,3 @@ void main()
     print c;
   println "Hello World";
 }
-
