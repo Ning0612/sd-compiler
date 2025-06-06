@@ -13,10 +13,6 @@ float multiply(float a, float b) {
     return a * b;
 }
 
-string errorTest() {
-    return "error test"; // Error: return type is string, but returning int
-}
-
 void main() {
     int a = 5;
     int b = 10;
@@ -28,8 +24,6 @@ void main() {
     float sumDouble;
 
     sumInt = add(a, b);             // Valid call
-    sumInt = add(a + b, c);         // Implicit conversion from float to int
-    sumDouble = add(c, d);          // Implicit conversion: float to int, then result assigned to float
 
     // Multiplication
     float product;

@@ -41,10 +41,5 @@ void main(){
         int a = 1 + 2 * 3;
         const int zc = 0;
         int z = 0;
-        int b = 24 / 0;         // Error: division by constant zero
-        int c = 3 + 3 % 0;      // Error: modulus by constant zero
-        a = 34 / (23 * 3 * 0);  // Error: division by constant zero in expression
-        a = 42 / zc;            // Error: division by const zero
-        a = 42 / z;             // OK: runtime check (z is a variable)
     }
 }

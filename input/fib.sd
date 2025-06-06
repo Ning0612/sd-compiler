@@ -26,7 +26,7 @@ int itFibonacci (int n) {
 void main()
 { 
   print "N: ";
-  print n;
+  println n;
   print "Result of iterative computation:";
-  print itFibonacci(n);
+  println itFibonacci(n);
 }

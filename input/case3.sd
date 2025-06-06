@@ -11,32 +11,39 @@ void main(){
     // do-while loop (executes at least once)
     do {
         print i;
+        print " ";
+        i++;
     } while (i < range);
 
     // nested for-loops with single init/update expressions
     for (i = 0; i < range; i++) {
         for (j = 0; j < range; j++) {
             print i + j;
+            print " ";
         }
+        println "";
     }
 
     // for-loop with multiple init and update expressions
     for (i = 0, j = 0; i < range; i++, j++) {
         print i + j;
+        print " ";
     }
+    println "";
 
     // foreach with valid constant range: 0 to 9 (inclusive of start, exclusive of end)
     foreach (i : 0 .. range) {
         print i;
+        print " ";
     }
+    println "";
 
     // foreach with valid constant expression range: -90 to 60
     foreach (i : -3 * 30 .. 30 * 2) {
         print i;
+        print " ";
     }
+    println "";
 
-    // Error: foreach range start is not less than end (start == end)
-    foreach (i : range .. range) {
-        print i;
-    }
+
 }

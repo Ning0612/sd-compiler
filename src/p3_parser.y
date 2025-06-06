@@ -616,8 +616,8 @@ loop_stmt
 
     Symbol* sym = ctx->symTab.lookup(id);
     if (sym != nullptr) {
-        tryDeclareVarable(ctx->symTab, VarInit("_to", ctx->typePool.make(BK_Int)), ctx->typePool.make(BK_Int), yylineno);
-        tryDeclareVarable(ctx->symTab, VarInit("_delta", ctx->typePool.make(BK_Int)), ctx->typePool.make(BK_Int), yylineno);
+        ctx->symTab.insert(Symbol("_to", ctx->typePool.make(BK_Int), false));
+        ctx->symTab.insert(Symbol("_delta", ctx->typePool.make(BK_Int), false));
 
         Symbol* toSym = ctx->symTab.lookup("_to");
         Symbol* deltaSym = ctx->symTab.lookup("_delta");

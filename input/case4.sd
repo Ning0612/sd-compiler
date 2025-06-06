@@ -7,7 +7,10 @@ void main(){
     int i;
     foreach(i : 1. .10){
         print i;
+        print " ";
     }
+    println "";
+
     int c;
     i++;
     c = ++i;
@@ -15,12 +18,4 @@ void main(){
     c = add(3, 5);
 
 
-    /*
-    a = ++i;
-    a = i++;
-    if (true)
-        int a;
-    else
-        a = 3;
-    */
 }
