@@ -24,6 +24,7 @@ void emitConst(const ExprInfo& e, Context* ctx) {
         case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(e.getFloat()) + "f"); break;
         case BK_Bool:  ctx->fileContent.push_back("        ldc " + std::to_string(e.getBool() ? 1 : 0));break;
         case BK_String: ctx->fileContent.push_back("        ldc \"" + e.getString() + "\""); break;
+        default: break;
     }
 }
 

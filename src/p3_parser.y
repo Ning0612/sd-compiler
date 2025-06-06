@@ -401,7 +401,7 @@ simple_stmt
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
@@ -420,7 +420,7 @@ simple_stmt
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
@@ -509,7 +509,6 @@ lvalue
     }
     ;
 
-/* 前綴：if (...) 動作一次寫完 */
 if_prefix
     : IF LPAREN expression RPAREN
       {
@@ -518,35 +517,34 @@ if_prefix
           if (expr.isConst) emitConst(expr, ctx);
 
           /* 先預設 false-label */
-          ctx->fileContent.push_back("        ifeq LFalse" + std::to_string(ctx->ifFalseLabelCounter));
+          ctx->fileContent.push_back("        ifeq FFalse" + std::to_string(ctx->ifFalseLabelCounter));
           ctx->ifFalseLabels.push_back(ctx->ifFalseLabelCounter);
           ctx->ifFalseLabelCounter++;
       }
     ;
 
-/* 把 “是否有 else” 抽成 opt_else */
 opt_else
-    : ELSE                         /* 有 else → 之後一定還有 statement */
+    : ELSE
       {
         /* 這裡放你原本 $@4 的動作：從 then 區塊跳到 exit */
-        ctx->fileContent.push_back("        goto LExit" + std::to_string(ctx->ifExitLabelCounter));
+        ctx->fileContent.push_back("        goto FExit" + std::to_string(ctx->ifExitLabelCounter));
         ctx->ifExitLabels.push_back(ctx->ifExitLabelCounter);
         ctx->ifExitLabelCounter++;
 
-        ctx->fileContent.push_back("LFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
+        ctx->fileContent.push_back("FFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
         ctx->ifFalseLabels.pop_back();
         ctx->fileContent.push_back("        nop");
 
       }
       statement                    /* else 區塊 */
       {
-        ctx->fileContent.push_back("LExit" + std::to_string(ctx->ifExitLabels.back()) + ":");
+        ctx->fileContent.push_back("FExit" + std::to_string(ctx->ifExitLabels.back()) + ":");
         ctx->ifExitLabels.pop_back();
         ctx->fileContent.push_back("        nop");
       }
     | /* empty */                  /* 沒有 else */
       {
-        ctx->fileContent.push_back("LFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
+        ctx->fileContent.push_back("FFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
         ctx->ifFalseLabels.pop_back();
         ctx->fileContent.push_back("        nop");
       }
@@ -558,13 +556,35 @@ if_stmt
 
 /* Loop Statements */
 loop_stmt
-    : WHILE LPAREN expression RPAREN statement{ 
-        ExprInfo expr = *$3; delete $3;
+    : WHILE {
+        ctx->fileContent.push_back("WBegin" + std::to_string(ctx->whileLabelCounter) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->whileLabels.push_back(ctx->whileLabelCounter);
+        ctx->whileLabelCounter++;
+    } LPAREN expression {
+        ExprInfo expr = *$4; delete $4;
         if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
+        if (expr.isConst) emitConst(expr, ctx);
+        ctx->fileContent.push_back("        ifeq WEnd" + std::to_string(ctx->whileLabels.back()));
+    } RPAREN statement{ 
+        ctx->fileContent.push_back("        goto WBegin" + std::to_string(ctx->whileLabels.back()));
+        ctx->fileContent.push_back("WEnd" + std::to_string(ctx->whileLabels.back()) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->whileLabels.pop_back();
     }
-    | DO statement WHILE LPAREN expression RPAREN SEMICOLON {
-        ExprInfo expr = *$5; delete $5;
+    | DO {
+        ctx->fileContent.push_back("DBegin" + std::to_string(ctx->whileLabelCounter) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->whileLabels.push_back(ctx->whileLabelCounter);
+        ctx->whileLabelCounter++;
+    } statement WHILE LPAREN expression RPAREN SEMICOLON {
+        ExprInfo expr = *$6; delete $6;
         if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
+        if (expr.isConst) emitConst(expr, ctx);
+        ctx->fileContent.push_back("        ifne DBegin" + std::to_string(ctx->whileLabels.back()));
+        ctx->fileContent.push_back("DEnd" + std::to_string(ctx->whileLabels.back()) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->whileLabels.pop_back();
     }
     | FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
         ExprInfo expr = *$5; delete $5;
@@ -593,7 +613,7 @@ for_simple_item
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
@@ -612,7 +632,7 @@ for_simple_item
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
@@ -960,7 +980,7 @@ func_call
                     std::string call = "        invokestatic ";
                     call += symbol->type->ret->base == BK_Void ? "void " : baseKindToJavaStr(symbol->type->ret->base) + " ";
                     call += funcName + "(";
-                    for (int i = 0; i < args.size(); ++i) {
+                    for (size_t  i = 0; i < args.size(); ++i) {
                         if (i > 0) call += ", ";
                         switch (args[i].type->base) {
                             case BK_Int: call += "int"; break;
@@ -994,7 +1014,7 @@ proc_call
             }else{
                 std::string call = "        invokestatic ";
                 call += "void " + funcName + "(";
-                for (int i = 0; i < args.size(); ++i) {
+                for (size_t i = 0; i < args.size(); ++i) {
                     if (i > 0) call += ", ";
                     switch (args[i].type->base) {
                         case BK_Int: call += "int"; break;

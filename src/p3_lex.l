@@ -10,7 +10,7 @@
 
 #define MAX_LINE_LENGTH 1024
 
-#define DEBUG_LEX
+// #define DEBUG_LEX
 
 #define MAX_LINE_LENGTH 1024
 
