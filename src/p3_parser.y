@@ -253,7 +253,10 @@ func_decl
         std::string declaration = "    method public static " + baseKindToJavaStr($1->base) + " " + funcName + "(";
         for (size_t i = 0; i < paramList.size(); ++i) {
             if (i > 0) declaration += ", ";
-            declaration += "int";
+            declaration +=(paramList[i].type->base == BK_Int) ? "int" :
+                           (paramList[i].type->base == BK_Float) ? "float" :
+                           (paramList[i].type->base == BK_Bool) ? "int" :
+                           (paramList[i].type->base == BK_String) ? "java.lang.String" : "unknown";
         }
 
         declaration += ")";
@@ -300,7 +303,10 @@ func_decl
 
             for (size_t i = 0; i < paramList.size(); ++i) {
                 if (i > 0) declaration += ", ";
-                declaration += "int";
+                declaration += (paramList[i].type->base == BK_Int) ? "int" :
+                               (paramList[i].type->base == BK_Float) ? "float" :
+                               (paramList[i].type->base == BK_Bool) ? "int" :
+                               (paramList[i].type->base == BK_String) ? "java.lang.String" : "unknown";
             }
             declaration += ")";
 
@@ -492,16 +498,16 @@ simple_stmt
         SemanticError("read statement not supported in code generation", yylineno);
     }
     | lvalue INC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(true, $1, ctx, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, ctx, yylineno);
      }
     | lvalue DEC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(false, $1, ctx, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, ctx, yylineno);
      }
     | INC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(true, $2, ctx, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, ctx, yylineno);
      }
     | DEC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(false, $2, ctx, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, ctx, yylineno);
     }
     | SEMICOLON
     ;
@@ -560,39 +566,198 @@ lvalue
 
 /* If Statement */
 if_stmt
-    : IF LPAREN expression RPAREN statement %prec IFX {
-        ExprInfo expr = *$3; delete $3;
-        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
+    : if_condition statement %prec IFX {
+        // 處理 if-then 結束
+        std::string labelEnd = ctx->pendingIfLabels.back();
+        ctx->pendingIfLabels.pop_back();
+        if (!labelEnd.empty()) {  // 只有非常數條件才需要標籤
+            ctx->fileContent.push_back(labelEnd + ":");
+        }
     }
-    | IF LPAREN expression RPAREN statement ELSE statement {
+    | if_condition statement ELSE {
+        // 處理 then 分支結束，準備 else 分支
+        std::string labelElse = ctx->pendingIfLabels.back();
+        if (!labelElse.empty()) {  // 只有非常數條件才需要跳躍
+            std::string labelEnd = "I" + std::to_string(ctx->ifLabelCounter++);
+            ctx->pendingIfLabels.back() = labelEnd;
+            
+            ctx->fileContent.push_back("        goto " + labelEnd);
+            ctx->fileContent.push_back(labelElse + ":");
+        }
+    } statement {
+        // 處理 if-then-else 結束
+        std::string labelEnd = ctx->pendingIfLabels.back();
+        ctx->pendingIfLabels.pop_back();
+        if (!labelEnd.empty()) {  // 只有非常數條件才需要標籤
+            ctx->fileContent.push_back(labelEnd + ":");
+        }
+    }
+    ;
+
+if_condition
+    : IF LPAREN expression RPAREN {
         ExprInfo expr = *$3; delete $3;
-        if (expr.isValid) checkBoolExpr("if", expr, yylineno);
+        if (expr.isValid) {
+            checkBoolExpr("if", expr, yylineno);
+            
+            if (expr.isConst) {
+                // 常數條件：先載入常數值到棧中
+                switch(expr.type->base) {
+                    case BK_Bool:
+                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
+                        break;
+                    case BK_Int:
+                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
+                        break;
+                    case BK_Float:
+                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
+                        break;
+                    case BK_String:
+                        ctx->fileContent.push_back("        ldc \"" + expr.getString() + "\"");
+                        break;
+                    default:
+                        break;
+                }
+                
+                // 然後生成條件跳躍（即使是常數也要生成，因為可能有副作用）
+                std::string labelFalse = "I" + std::to_string(ctx->ifLabelCounter++);
+                ctx->fileContent.push_back("        ifeq " + labelFalse);
+                ctx->pendingIfLabels.push_back(labelFalse);
+                
+                // 對常數條件發出警告
+                if (expr.getBool()) {
+                    SemanticWarning("condition is always true", yylineno);
+                } else {
+                    SemanticWarning("condition is always false", yylineno);
+                }
+            } else {
+                // 非常數條件：expression 的值已經在棧頂了
+                std::string labelFalse = "I" + std::to_string(ctx->ifLabelCounter++);
+                ctx->fileContent.push_back("        ifeq " + labelFalse);
+                ctx->pendingIfLabels.push_back(labelFalse);
+            }
+        } else {
+            // 無效表達式，使用空標籤佔位
+            ctx->pendingIfLabels.push_back("");
+        }
     }
     ;
 
 /* Loop Statements */
+/* Loop Statements */
 loop_stmt
-    : WHILE LPAREN expression RPAREN statement{ 
-        ExprInfo expr = *$3; delete $3;
-        if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
-    }
-    | DO statement WHILE LPAREN expression RPAREN SEMICOLON {
-        ExprInfo expr = *$5; delete $5;
-        if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
-    }
-    | FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
-        ExprInfo expr = *$5; delete $5;
-        if (expr.isValid) checkBoolExpr("for", expr, yylineno);
-    }
-    | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
-        ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
-        std::string id = *$3; delete $3;
-        if (from.isValid && to.isValid) {
-            checkForeachRange(from, to, yylineno);
-        }
-        checkForeachIndex(ctx->symTab.lookup(id), yylineno);
-    }
-    ;
+   : WHILE LPAREN {
+       std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
+       std::string labelEnd = "W" + std::to_string(ctx->whileLabelCounter++);
+       ctx->fileContent.push_back(labelBegin + ":");
+       ctx->pendingWhileLabels.push_back({labelBegin, labelEnd});
+   } expression RPAREN {
+       ExprInfo expr = *$4; delete $4;
+       if (expr.isValid) {
+           checkBoolExpr("while", expr, yylineno);
+           std::string labelEnd = ctx->pendingWhileLabels.back().second;
+           if (expr.isConst) {
+               switch(expr.type->base) {
+                   case BK_Bool:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
+                       break;
+                   case BK_Int:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
+                       break;
+                   case BK_Float:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
+                       break;
+                   default:
+                       break;
+               }
+           }
+           ctx->fileContent.push_back("        ifeq " + labelEnd);
+       }
+   } statement {
+       std::string labelBegin = ctx->pendingWhileLabels.back().first;
+       std::string labelEnd = ctx->pendingWhileLabels.back().second;
+       ctx->pendingWhileLabels.pop_back();
+       ctx->fileContent.push_back("        goto " + labelBegin);
+       ctx->fileContent.push_back(labelEnd + ":");
+   }
+   | DO {
+       std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
+       ctx->fileContent.push_back(labelBegin + ":");
+       ctx->pendingWhileLabels.push_back({labelBegin, ""});
+   } statement WHILE LPAREN expression RPAREN SEMICOLON {
+       ExprInfo expr = *$6; delete $6;
+       if (expr.isValid) {
+           checkBoolExpr("do while", expr, yylineno);
+           std::string labelBegin = ctx->pendingWhileLabels.back().first;
+           ctx->pendingWhileLabels.pop_back();
+           if (expr.isConst) {
+               switch(expr.type->base) {
+                   case BK_Bool:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
+                       break;
+                   case BK_Int:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
+                       break;
+                   case BK_Float:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
+                       break;
+                   default:
+                       break;
+               }
+           }
+           ctx->fileContent.push_back("        ifne " + labelBegin);
+       }
+   }
+   | FOR LPAREN {
+       std::string labelCondition = "F" + std::to_string(ctx->forLabelCounter++);
+       std::string labelUpdate = "F" + std::to_string(ctx->forLabelCounter++);
+       std::string labelEnd = "F" + std::to_string(ctx->forLabelCounter++);
+       ctx->pendingForLabels.push_back(std::make_tuple(labelCondition, labelUpdate, labelEnd));
+   } for_simple_opt SEMICOLON {
+       std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
+       ctx->fileContent.push_back("        goto " + labelCondition);
+       std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
+       ctx->fileContent.push_back(labelUpdate + ":");
+   } expression {
+       ExprInfo expr = *$7; delete $7;
+       if (expr.isValid) {
+           checkBoolExpr("for", expr, yylineno);
+           std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
+           std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
+           ctx->fileContent.push_back(labelCondition + ":");
+           if (expr.isConst) {
+               switch(expr.type->base) {
+                   case BK_Bool:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
+                       break;
+                   case BK_Int:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
+                       break;
+                   case BK_Float:
+                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
+                       break;
+                   default:
+                       break;
+               }
+           }
+           ctx->fileContent.push_back("        ifeq " + labelEnd);
+       }
+   } SEMICOLON for_simple_opt RPAREN statement {
+       std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
+       std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
+       ctx->pendingForLabels.pop_back();
+       ctx->fileContent.push_back("        goto " + labelUpdate);
+       ctx->fileContent.push_back(labelEnd + ":");
+   }
+   | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
+       ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
+       std::string id = *$3; delete $3;
+       if (from.isValid && to.isValid) {
+           checkForeachRange(from, to, yylineno);
+       }
+       checkForeachIndex(ctx->symTab.lookup(id), yylineno);
+   }
+   ;
 
 /* For Loop Optional Statements */
 for_simple_opt
@@ -700,17 +865,17 @@ for_simple_item
         ExprInfo expr = *exprPtr; delete exprPtr;
         if (expr.isValid) checkRead(expr, yylineno);
     }
-    | lvalue INC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(true, $1, ctx, yylineno);
+    | lvalue INC {
+        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, ctx, yylineno);
      }
-    | lvalue DEC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(false, $1, ctx, yylineno);
+    | lvalue DEC {
+        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, ctx, yylineno);
      }
-    | INC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(true, $2, ctx, yylineno);
+    | INC lvalue {
+        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, ctx, yylineno);
      }
-    | DEC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(false, $2, ctx, yylineno);
+    | DEC lvalue {
+        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, ctx, yylineno);
     }
     ;
 
@@ -762,19 +927,30 @@ return_stmt
             switch (ctx->funcType->base) {
             case BK_Int:
                 ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                ctx->fileContent.push_back("        ireturn");
                 break;
             case BK_Float:
                 ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                ctx->fileContent.push_back("        freturn");
                 break;
             case BK_Bool:
                 ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                ctx->fileContent.push_back("        ireturn");
                 break;
             default:
                 SemanticError("unsupported return type", yylineno);
             }
+        }
+
+        switch (ctx->funcType->base) {
+        case BK_Int:
+            ctx->fileContent.push_back("        ireturn");
+            break;
+        case BK_Float:
+            ctx->fileContent.push_back("        freturn");
+            break;
+        case BK_Bool:
+            ctx->fileContent.push_back("        ireturn");
+            break;
+        default:
+            SemanticError("unsupported return type", yylineno);
         }
     }
     ;
@@ -837,7 +1013,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = relOpResult(OPLT, lhs , rhs, ctx->typePool, yylineno);
+            $$ = relOpResult(OPLT, lhs , rhs, ctx, yylineno);
         }
     }
     | expression LE    expression   { 
@@ -846,7 +1022,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = relOpResult(OPLE, lhs , rhs, ctx->typePool, yylineno);
+            $$ = relOpResult(OPLE, lhs , rhs, ctx, yylineno);
         }
     }
     | expression GT    expression   { 
@@ -855,7 +1031,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = relOpResult(OPGT, lhs , rhs, ctx->typePool, yylineno);
+            $$ = relOpResult(OPGT, lhs , rhs, ctx, yylineno);
         }
     }
     | expression GE    expression   { 
@@ -864,17 +1040,16 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = relOpResult(OPGE, lhs , rhs, ctx->typePool, yylineno);
+            $$ = relOpResult(OPGE, lhs , rhs, ctx, yylineno);
         }
     }
-
     | expression EQ    expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
         if(!lhs.isValid || !rhs.isValid) {
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = eqOpResult(true, lhs, rhs, ctx->typePool, yylineno);
+            $$ = eqOpResult(true, lhs, rhs, ctx, yylineno);
         }
     }
     | expression NEQ   expression   {
@@ -883,17 +1058,16 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = eqOpResult(false, lhs, rhs, ctx->typePool, yylineno);
+            $$ = eqOpResult(false, lhs, rhs, ctx, yylineno);
         }
     }
-
     | expression AND   expression   {
         ExprInfo lhs = *$1; ExprInfo rhs = *$3; delete $1; delete $3;
         if(!lhs.isValid || !rhs.isValid) {
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = boolOpResult(true, lhs , rhs, ctx->typePool, yylineno);
+            $$ = boolOpResult(true, lhs , rhs, ctx, yylineno);
         }   
     }
     | expression OR expression      {
@@ -902,7 +1076,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = boolOpResult(false, lhs , rhs, ctx->typePool, yylineno);
+            $$ = boolOpResult(false, lhs , rhs, ctx, yylineno);
         }
     }
     | NOT expression                {
@@ -911,7 +1085,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = notOpResult(expr, ctx->typePool, yylineno);
+            $$ = notOpResult(expr, ctx, yylineno);
         }
     }
     | MINUS expression %prec UMINUS {
@@ -920,7 +1094,7 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = unaryOpResult(true, expr, yylineno);
+            $$ = unaryOpResult(true, expr, ctx, yylineno);
         }
     }
     | PLUS expression %prec UPLUS   {
@@ -929,20 +1103,20 @@ expression
             $$ = makeInvalidExpr();
         }
         else{
-            $$ = unaryOpResult(false, expr, yylineno);
+            $$ = unaryOpResult(false, expr, ctx, yylineno);
         }
     }
     | INC lvalue %prec INC      {
-        $$ = checkIncDecValid(true, $2, ctx, yylineno);
+        $$ = checkIncDecValid(true, true, $2, ctx, yylineno);
      }
     | DEC lvalue %prec DEC      {
-        $$ = checkIncDecValid(false, $2, ctx, yylineno);
+        $$ = checkIncDecValid(false, true, $2, ctx, yylineno);
      }
     | lvalue INC %prec POSTINC {
-        $$ = checkIncDecValid(true, $1, ctx, yylineno);
+        $$ = checkIncDecValid(true, true, $1, ctx, yylineno);
      }
     | lvalue DEC %prec POSTDEC {
-        $$ = checkIncDecValid(false, $1, ctx, yylineno);
+        $$ = checkIncDecValid(false, true, $1, ctx, yylineno);
     }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {
@@ -1036,6 +1210,21 @@ func_call
             }else{
                 if (checkFuncCall(symbol, funcName, args, yylineno)){
                     $$ = new ExprInfo(symbol->type->ret);
+                    std::string call = "        invokestatic ";
+                    call += symbol->type->ret->base == BK_Void ? "void " : baseKindToJavaStr(symbol->type->ret->base) + " ";
+                    call += funcName + "(";
+                    for (int i = 0; i < args.size(); ++i) {
+                        if (i > 0) call += ", ";
+                        switch (args[i].type->base) {
+                            case BK_Int: call += "int"; break;
+                            case BK_Float: call += "float"; break;
+                            case BK_Bool: call += "int"; break;
+                            default: SemanticError("unsupported argument type in function call", yylineno);
+                        }
+                    }
+                    call += ")";
+                    ctx->fileContent.push_back(call);
+
                 }else{
                     $$ = makeInvalidExpr();
                 }
@@ -1055,6 +1244,20 @@ proc_call
             checkFuncCall(symbol, funcName, args, yylineno);
             if (symbol->type->base != BK_Void) {
                 SemanticError("function " + funcName + " should get return value", yylineno);
+            }else{
+                std::string call = "        invokestatic ";
+                call += "void " + funcName + "(";
+                for (int i = 0; i < args.size(); ++i) {
+                    if (i > 0) call += ", ";
+                    switch (args[i].type->base) {
+                        case BK_Int: call += "int"; break;
+                        case BK_Float: call += "float"; break;
+                        case BK_Bool: call += "int"; break;
+                        default: SemanticError("unsupported argument type in function call", yylineno);
+                    }
+                }
+                call += ")";
+                ctx->fileContent.push_back(call);
             }
         }else{
             SemanticError("undeclared function: " + funcName, yylineno);
@@ -1069,11 +1272,31 @@ arg_list_opt
 
 arg_list
     : expression {
+        if ($1->isConst) {
+            switch ($1->type->base) {
+                case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string($1->iVal)); break;
+                case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string($1->fVal) + "f"); break;
+                case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string($1->bVal ? "1" : "0")); break;
+                case BK_String: ctx->fileContent.push_back("        ldc \"" + $1->sVal + "\""); break;
+                default: break;
+            }
+        }
+
         $$ = new std::vector<ExprInfo>();
         $$->push_back(*$1);
         delete $1;
     }
     | arg_list COMMA expression{
+        if ($3->isConst) {
+            switch ($3->type->base) {
+                case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string($3->iVal)); break;
+                case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string($3->fVal) + "f"); break;
+                case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string($3->bVal ? "1" : "0")); break;
+                case BK_String: ctx->fileContent.push_back("        ldc \"" + $3->sVal + "\""); break;
+                default: break;
+            }
+        }
+
         $$ = $1;
         $$->push_back(*$3);
         delete $3;

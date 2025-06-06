@@ -168,7 +168,8 @@ ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Co
 }
 
 /*───────── relational (< <= > >=) ─────────*/
-ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
+ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno) {
+    TypeArena& pool = ctx->typePool;
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
     if (!lhs.isValid || !rhs.isValid) {
         return makeInvalidExpr();
@@ -210,13 +211,96 @@ ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeAr
             bool r = (op==OPLT)?a<b:(op==OPLE)?a<=b:(op==OPGT)?a>b:a>=b;
             result->setBool(r);
         }
+    } else {
+        // 生成Java assembly代碼
+        if (lhs.isConst) {
+            // 處理左運算元是常數的情況
+            switch(b1) {
+                case BK_Bool:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getBool() ? 1 : 0));
+                    break;
+                case BK_Int:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getInt()));
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getFloat()));
+                    break;
+                default: break;
+            }
+            ctx->fileContent.push_back("        swap");
+        }
+
+        if (rhs.isConst) {
+            // 處理右運算元是常數的情況
+            switch(b2) {
+                case BK_Bool:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getBool() ? 1 : 0));
+                    break;
+                case BK_Int:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getInt()));
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getFloat()));
+                    break;
+                default: break;
+            }
+        }
+
+        // 生成比較指令序列，使用 C 前綴標籤 (Compare operations)
+        std::string labelTrue = "C" + std::to_string(ctx->compareLabelCounter++);
+        std::string labelEnd = "C" + std::to_string(ctx->compareLabelCounter++);
+
+        // 根據數據類型選擇比較方式
+        if (resultBase == BK_Float) {
+            // 浮點數比較需要使用 fcmpl/fcmpg
+            ctx->fileContent.push_back("        fcmpl");  // 或者根據需要使用 fcmpg
+            
+            // 現在棧頂是比較結果 (-1, 0, 1)，可以使用整數條件跳躍
+            std::string jumpInstruction;
+            switch(op) {
+                case OPLT:  // 
+                    jumpInstruction = "iflt";  // 結果 < 0
+                    break;
+                case OPLE:  // <=
+                    jumpInstruction = "ifle";  // 結果 <= 0
+                    break;
+                case OPGT:  // >
+                    jumpInstruction = "ifgt";  // 結果 > 0
+                    break;
+                case OPGE:  // >=
+                    jumpInstruction = "ifge";  // 結果 >= 0
+                    break;
+            }
+            
+            ctx->fileContent.push_back("        " + jumpInstruction + " " + labelTrue);
+        } else {
+            // 整數比較使用減法
+            ctx->fileContent.push_back("        isub");
+            
+            std::string jumpInstruction;
+            switch(op) {
+                case OPLT:  jumpInstruction = "iflt"; break;
+                case OPLE:  jumpInstruction = "ifle"; break;
+                case OPGT:  jumpInstruction = "ifgt"; break;
+                case OPGE:  jumpInstruction = "ifge"; break;
+            }
+            
+            ctx->fileContent.push_back("        " + jumpInstruction + " " + labelTrue);
+        }
+
+        ctx->fileContent.push_back("        iconst_0");  // false
+        ctx->fileContent.push_back("        goto " + labelEnd);
+        ctx->fileContent.push_back(labelTrue + ":");
+        ctx->fileContent.push_back("        iconst_1");  // true
+        ctx->fileContent.push_back(labelEnd + ":");
     }
 
     return result;
 }
 
 /*───────── equal / not‑equal ─────────*/
-ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
+ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno) {
+    TypeArena& pool = ctx->typePool;
     BaseKind b1=lhs.type->base, b2=rhs.type->base;
     if (!lhs.isValid || !rhs.isValid) {
         return makeInvalidExpr();
@@ -257,13 +341,107 @@ ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeA
             case BK_Float:  result->setBool(cmp(lhs.getFloat(),  rhs.getFloat())); break;
             default:        break;
         }
+    } else {
+        // 生成Java assembly代碼
+        if (lhs.isConst) {
+            // 處理左運算元是常數的情況
+            switch(b1) {
+                case BK_Bool:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getBool() ? 1 : 0));
+                    break;
+                case BK_Int:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getInt()));
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getFloat()));
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + lhs.getString() + "\"");
+                    break;
+                default: break;
+            }
+            ctx->fileContent.push_back("        swap");
+        }
+
+        if (rhs.isConst) {
+            // 處理右運算元是常數的情況
+            switch(b2) {
+                case BK_Bool:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getBool() ? 1 : 0));
+                    break;
+                case BK_Int:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getInt()));
+                    break;
+                case BK_Float:
+                    ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getFloat()));
+                    break;
+                case BK_String:
+                    ctx->fileContent.push_back("        ldc \"" + rhs.getString() + "\"");
+                    break;
+                default: break;
+            }
+        }
+
+        // 生成比較指令序列，使用 E 前綴標籤 (Equal operations)
+        std::string labelTrue = "E" + std::to_string(ctx->equalLabelCounter++);
+        std::string labelEnd = "E" + std::to_string(ctx->equalLabelCounter++);
+        
+        // 根據數據類型選擇比較方式
+        if (resultBase == BK_String) {
+            // 字串比較使用 String.equals()
+            ctx->fileContent.push_back("        invokevirtual boolean java.lang.String.equals(java.lang.Object)");
+            if (!equal) {
+                // 對於 != 需要反轉結果
+                ctx->fileContent.push_back("        ifeq " + labelTrue);
+                ctx->fileContent.push_back("        iconst_0");
+                ctx->fileContent.push_back("        goto " + labelEnd);
+                ctx->fileContent.push_back(labelTrue + ":");
+                ctx->fileContent.push_back("        iconst_1");
+                ctx->fileContent.push_back(labelEnd + ":");
+            }
+        } else if (resultBase == BK_Float) {
+            // 浮點數比較使用 fcmpl
+            ctx->fileContent.push_back("        fcmpl");
+            
+            if (equal) {
+                // == : 結果為 0 時為真
+                ctx->fileContent.push_back("        ifeq " + labelTrue);
+            } else {
+                // != : 結果不為 0 時為真
+                ctx->fileContent.push_back("        ifne " + labelTrue);
+            }
+            
+            ctx->fileContent.push_back("        iconst_0");  // false
+            ctx->fileContent.push_back("        goto " + labelEnd);
+            ctx->fileContent.push_back(labelTrue + ":");
+            ctx->fileContent.push_back("        iconst_1");  // true
+            ctx->fileContent.push_back(labelEnd + ":");
+        } else {
+            // 整數和布林比較使用減法
+            ctx->fileContent.push_back("        isub");
+            
+            if (equal) {
+                // == : 結果為 0 時為真
+                ctx->fileContent.push_back("        ifeq " + labelTrue);
+            } else {
+                // != : 結果不為 0 時為真
+                ctx->fileContent.push_back("        ifne " + labelTrue);
+            }
+            
+            ctx->fileContent.push_back("        iconst_0");  // false
+            ctx->fileContent.push_back("        goto " + labelEnd);
+            ctx->fileContent.push_back(labelTrue + ":");
+            ctx->fileContent.push_back("        iconst_1");  // true
+            ctx->fileContent.push_back(labelEnd + ":");
+        }
     }
 
     return result;
 }
 
 /*───────── and / or ─────────*/
-ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno) {
+ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno) {
+    TypeArena& pool = ctx->typePool;
     if (!lhs.isValid || !rhs.isValid) {
         return makeInvalidExpr();
     }
@@ -281,13 +459,29 @@ ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, Typ
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), lhs.isConst && rhs.isConst);
     if (result->isConst) {
         result->setBool(isAnd ? (lhs.getBool() && rhs.getBool()): (lhs.getBool() || rhs.getBool()));
+    }else{
+        if (lhs.isConst) {
+            ctx->fileContent.push_back("        ldc " + std::to_string(lhs.getBool() ? 1 : 0));
+            ctx->fileContent.push_back("        swap");
+        }
+
+        if (rhs.isConst) {
+            ctx->fileContent.push_back("        ldc " + std::to_string(rhs.getBool() ? 1 : 0));
+        }
+
+        if (isAnd) {
+            ctx->fileContent.push_back("        iand");
+        } else {
+            ctx->fileContent.push_back("        ior");
+        }
     }
 
     return result;
 }
 
 /*───────── not ─────────*/
-ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno) {
+ExprInfo* notOpResult(const ExprInfo& expr, Context* ctx, int lineno) {
+    TypeArena& pool = ctx->typePool;
     if (!expr.isValid) {
         return makeInvalidExpr();
     }
@@ -298,14 +492,18 @@ ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno) {
     }
 
     ExprInfo* result = new ExprInfo(pool.make(BK_Bool), expr.isConst);
-    if (expr.isConst)
+    if (expr.isConst){
         result->setBool(!expr.getBool());
+    } else {
+        ctx->fileContent.push_back("        ldc 1");
+        ctx->fileContent.push_back("        ixor"); // XOR with 1 flips the boolean value
+    }
 
     return result;
 }
 
 /*───────── unary + / - ─────────*/
-ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
+ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, Context* ctx, int lineno) {
     if (!expr.isValid) {
         return makeInvalidExpr();
     }
@@ -333,13 +531,21 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno) {
                 SemanticError("unsupported unary constant type", lineno);
                 return makeInvalidExpr();
         }
+    }else{
+        if (isMinus){
+            switch (expr.type->base) {
+                case BK_Int: ctx->fileContent.push_back("        ineg"); break;
+                case BK_Float: ctx->fileContent.push_back("        fneg"); break;
+                default: break; // no other types
+            }
+        }
     }
     return result;
 }
 
 /*───────── check is the expression a INC or DEC ─────────*/
 // true for increment, false for decrement
-ExprInfo *checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno) {
+ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, Context* ctx, int lineno) {
     ExprInfo *exprPtr = ((sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr());
     ExprInfo expr = *exprPtr; delete exprPtr;
     std::string opStr = (op ? "++" : "--");
@@ -370,14 +576,14 @@ ExprInfo *checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno
                 ctx->fileContent.push_back("        ldc 1");
                 ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
                 ctx->fileContent.push_back("        putstatic int " + sym->name);
-                ctx->fileContent.push_back("        getstatic int " + sym->name);
+                if (relood) ctx->fileContent.push_back("        getstatic int " + sym->name);
 
             } else if (sym->type->base == BK_Float) {
                 ctx->fileContent.push_back("        getstatic float " + sym->name);
                 ctx->fileContent.push_back("        ldc 1.0f");
                 ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
                 ctx->fileContent.push_back("        putstatic float " + sym->name);
-                ctx->fileContent.push_back("        getstatic float " + sym->name);
+                if (relood) ctx->fileContent.push_back("        getstatic float " + sym->name);
             }
         }
         else {
@@ -386,14 +592,14 @@ ExprInfo *checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno
                 ctx->fileContent.push_back("        ldc 1");
                 ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
                 ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                if (relood) ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
 
             } else if (sym->type->base == BK_Float) {
                 ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
                 ctx->fileContent.push_back("        ldc 1.0f");
                 ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
                 ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                if (relood) ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
             }
         }
 

@@ -39,22 +39,22 @@ ExprInfo* concatStringResult(const ExprInfo& lhs, const ExprInfo& rhs, TypeArena
 ExprInfo* numericOpResult(NumOp op, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno);
 
 // Evaluate relational binary operations (e.g., <, >=)
-ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
+ExprInfo* relOpResult(RelOp op, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno);
 
 // Evaluate equality/inequality (==, !=)
-ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
+ExprInfo* eqOpResult(bool equal, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno);
 
 // Evaluate boolean binary operations (&&, ||)
-ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, TypeArena& pool, int lineno);
+ExprInfo* boolOpResult(bool isAnd, const ExprInfo& lhs, const ExprInfo& rhs, Context* ctx, int lineno);
 
 // Evaluate unary logical NOT (!)
-ExprInfo* notOpResult(const ExprInfo& expr, TypeArena& pool, int lineno);
+ExprInfo* notOpResult(const ExprInfo& expr, Context* ctx, int lineno);
 
 // Evaluate unary + or - (sign operator)
-ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, int lineno);
+ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, Context* ctx, int lineno);
 
 // Validate ++ or -- target is modifiable and not const
-ExprInfo * checkIncDecValid(const bool& op, Symbol* sym, Context* ctx, int lineno);
+ExprInfo * checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, Context* ctx, int lineno);
 
 /* ─────────────── Semantic Checks ─────────────── */
 
