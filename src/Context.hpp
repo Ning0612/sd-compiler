@@ -12,14 +12,15 @@ struct Context {
     Type* nowType = nullptr;
     std::vector<std::string> fileContent; // For storing file content
     Type* funcType = nullptr; // Type of the current function being processed
-    std::vector<std::string> pendingIfLabels;
-    std::vector<std::string> pendingForeachId;                           // foreach 變數名
-    std::vector<std::pair<std::string, std::string>> pendingWhileLabels;  // {begin, end}
-    std::vector<std::tuple<std::string, std::string, std::string>> pendingForLabels;  // {update, condition, end}
-    std::vector<size_t> pendingForUpdate;  // 用於插入更新代碼的位置
+    std::vector<int> ifFalseLabels; // Labels for if-else false branches
+    std::vector<int> ifExitLabels;  // Labels for if-else exit points
     int equalLabelCounter = 0;      // E標籤 (== !=)
     int compareLabelCounter = 0;    // C標籤 (> >= < <=)
+    int ifFalseLabelCounter = 0;    // IFFalse標籤 (if else)
+    int ifExitLabelCounter = 0;     // IExit標籤 (if else exit)
     int forLabelCounter = 0;        // F標籤 (for loop)
-    int ifLabelCounter = 0;         // I標籤 (if else)
     int whileLabelCounter = 0;      // W標籤 (while)
+
+    bool inIfStatement;
+    bool ifHasElse;
 };

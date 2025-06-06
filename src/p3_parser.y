@@ -509,132 +509,66 @@ lvalue
     }
     ;
 
-/* If Statement */
-if_stmt
-    : if_condition statement %prec IFX {
-        // 處理 if-then 結束
-        std::string labelEnd = ctx->pendingIfLabels.back();
-        ctx->pendingIfLabels.pop_back();
-        if (!labelEnd.empty()) {  // 只有非常數條件才需要標籤
-            ctx->fileContent.push_back(labelEnd + ":");
-        }
-    }
-    | if_condition statement ELSE {
-        // 處理 then 分支結束，準備 else 分支
-        std::string labelElse = ctx->pendingIfLabels.back();
-        if (!labelElse.empty()) {  // 只有非常數條件才需要跳躍
-            std::string labelEnd = "I" + std::to_string(ctx->ifLabelCounter++);
-            ctx->pendingIfLabels.back() = labelEnd;
-            
-            ctx->fileContent.push_back("        goto " + labelEnd);
-            ctx->fileContent.push_back(labelElse + ":");
-        }
-    } statement {
-        // 處理 if-then-else 結束
-        std::string labelEnd = ctx->pendingIfLabels.back();
-        ctx->pendingIfLabels.pop_back();
-        if (!labelEnd.empty()) {  // 只有非常數條件才需要標籤
-            ctx->fileContent.push_back(labelEnd + ":");
-        }
-    }
+/* 前綴：if (...) 動作一次寫完 */
+if_prefix
+    : IF LPAREN expression RPAREN
+      {
+          ExprInfo expr = *$3; delete $3;
+          if (expr.isValid) checkBoolExpr("if", expr, yylineno);
+          if (expr.isConst) emitConst(expr, ctx);
+
+          /* 先預設 false-label */
+          ctx->fileContent.push_back("        ifeq LFalse" + std::to_string(ctx->ifFalseLabelCounter));
+          ctx->ifFalseLabels.push_back(ctx->ifFalseLabelCounter);
+          ctx->ifFalseLabelCounter++;
+      }
     ;
 
-if_condition
-    : IF LPAREN expression RPAREN {
-        ExprInfo expr = *$3; delete $3;
-        if (expr.isValid) {
-            checkBoolExpr("if", expr, yylineno);
-            
-            if (expr.isConst) {
-                // 常數條件：先載入常數值到棧中
-                emitConst(expr, ctx);
-                
-                // 然後生成條件跳躍（即使是常數也要生成，因為可能有副作用）
-                std::string labelFalse = "I" + std::to_string(ctx->ifLabelCounter++);
-                ctx->fileContent.push_back("        ifeq " + labelFalse);
-                ctx->pendingIfLabels.push_back(labelFalse);
-                
-                // 對常數條件發出警告
-                if (expr.getBool()) {
-                    SemanticWarning("condition is always true", yylineno);
-                } else {
-                    SemanticWarning("condition is always false", yylineno);
-                }
-            } else {
-                // 非常數條件：expression 的值已經在棧頂了
-                std::string labelFalse = "I" + std::to_string(ctx->ifLabelCounter++);
-                ctx->fileContent.push_back("        ifeq " + labelFalse);
-                ctx->pendingIfLabels.push_back(labelFalse);
-            }
-        } else {
-            // 無效表達式，使用空標籤佔位
-            ctx->pendingIfLabels.push_back("");
-        }
-    }
+/* 把 “是否有 else” 抽成 opt_else */
+opt_else
+    : ELSE                         /* 有 else → 之後一定還有 statement */
+      {
+        /* 這裡放你原本 $@4 的動作：從 then 區塊跳到 exit */
+        ctx->fileContent.push_back("        goto LExit" + std::to_string(ctx->ifExitLabelCounter));
+        ctx->ifExitLabels.push_back(ctx->ifExitLabelCounter);
+        ctx->ifExitLabelCounter++;
+
+        ctx->fileContent.push_back("LFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
+        ctx->ifFalseLabels.pop_back();
+        ctx->fileContent.push_back("        nop");
+
+      }
+      statement                    /* else 區塊 */
+      {
+        ctx->fileContent.push_back("LExit" + std::to_string(ctx->ifExitLabels.back()) + ":");
+        ctx->ifExitLabels.pop_back();
+        ctx->fileContent.push_back("        nop");
+      }
+    | /* empty */                  /* 沒有 else */
+      {
+        ctx->fileContent.push_back("LFalse" + std::to_string(ctx->ifFalseLabels.back()) + ":");
+        ctx->ifFalseLabels.pop_back();
+        ctx->fileContent.push_back("        nop");
+      }
+    ;
+
+if_stmt
+    : if_prefix statement opt_else %prec IFX
     ;
 
 /* Loop Statements */
 loop_stmt
-    : WHILE LPAREN {
-        std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
-        std::string labelEnd = "W" + std::to_string(ctx->whileLabelCounter++);
-        ctx->fileContent.push_back(labelBegin + ":");
-        ctx->pendingWhileLabels.push_back({labelBegin, labelEnd});
-    } expression RPAREN {
-        ExprInfo expr = *$4; delete $4;
-        if (expr.isValid) {
-            checkBoolExpr("while", expr, yylineno);
-            std::string labelEnd = ctx->pendingWhileLabels.back().second;
-            if (expr.isConst) emitConst(expr, ctx);
-            ctx->fileContent.push_back("        ifeq " + labelEnd);
-        }
-    } statement {
-        std::string labelBegin = ctx->pendingWhileLabels.back().first;
-        std::string labelEnd = ctx->pendingWhileLabels.back().second;
-        ctx->pendingWhileLabels.pop_back();
-        ctx->fileContent.push_back("        goto " + labelBegin);
-        ctx->fileContent.push_back(labelEnd + ":");
+    : WHILE LPAREN expression RPAREN statement{ 
+        ExprInfo expr = *$3; delete $3;
+        if (expr.isValid) checkBoolExpr("while", expr, yylineno); 
     }
-    | DO {
-        std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
-        ctx->fileContent.push_back(labelBegin + ":");
-        ctx->pendingWhileLabels.push_back({labelBegin, ""});
-    } statement WHILE LPAREN expression RPAREN SEMICOLON {
-        ExprInfo expr = *$6; delete $6;
-        if (expr.isValid) {
-            checkBoolExpr("do while", expr, yylineno);
-            std::string labelBegin = ctx->pendingWhileLabels.back().first;
-            ctx->pendingWhileLabels.pop_back();
-            if (expr.isConst) emitConst(expr, ctx);
-            ctx->fileContent.push_back("        ifne " + labelBegin);
-        }
+    | DO statement WHILE LPAREN expression RPAREN SEMICOLON {
+        ExprInfo expr = *$5; delete $5;
+        if (expr.isValid) checkBoolExpr("do while", expr, yylineno);
     }
-    | FOR LPAREN {
-        std::string labelCondition = "F" + std::to_string(ctx->forLabelCounter++);
-        std::string labelUpdate = "F" + std::to_string(ctx->forLabelCounter++);
-        std::string labelEnd = "F" + std::to_string(ctx->forLabelCounter++);
-        ctx->pendingForLabels.push_back(std::make_tuple(labelCondition, labelUpdate, labelEnd));
-    } for_simple_opt SEMICOLON {
-        std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
-        ctx->fileContent.push_back("        goto " + labelCondition);
-        std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
-        ctx->fileContent.push_back(labelUpdate + ":");
-    } expression {
-        ExprInfo expr = *$7; delete $7;
-        if (expr.isValid) {
-            checkBoolExpr("for", expr, yylineno);
-            std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
-            std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
-            ctx->fileContent.push_back(labelCondition + ":");
-            if (expr.isConst) emitConst(expr, ctx);
-            ctx->fileContent.push_back("        ifeq " + labelEnd);
-        }
-    } SEMICOLON for_simple_opt RPAREN statement {
-        std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
-        std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
-        ctx->pendingForLabels.pop_back();
-        ctx->fileContent.push_back("        goto " + labelUpdate);
-        ctx->fileContent.push_back(labelEnd + ":");
+    | FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
+        ExprInfo expr = *$5; delete $5;
+        if (expr.isValid) checkBoolExpr("for", expr, yylineno);
     }
     | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
         ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
@@ -644,7 +578,7 @@ loop_stmt
         }
         checkForeachIndex(ctx->symTab.lookup(id), yylineno);
     }
-   ;
+    ;
 
 /* For Loop Optional Statements */
 for_simple_opt

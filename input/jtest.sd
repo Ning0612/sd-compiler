@@ -1,6 +1,6 @@
 void main(){
     int d, i;
-    i = 0;
+    i = -3;
 
     if (i == 0) {
         println "i is zero";
