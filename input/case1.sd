@@ -15,7 +15,7 @@ void main(){
     println b;
 
     print "Sum of a and b = ";
-    print a + b;
+    println a + b;
     
     print "Difference of a and b = ";
     println a - b;

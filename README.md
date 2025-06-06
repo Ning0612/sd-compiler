@@ -1,131 +1,154 @@
 
 ---
 
+# 🛠️ sD Compiler – Project 3
 
-# sD Compiler – Project 2
-
-This project implements a front-end compiler for a custom C-like language called **sD**, designed for educational compiler construction. The compiler performs **lexical analysis**, **parsing**, and **semantic analysis**, including type checking, constant folding, and error detection.
+本專案實作一個自訂 C-like 教學語言 **sD** 的完整編譯器，涵蓋 **語彙分析**、**語法分析**、**語意分析** 與 **程式碼產生（Code Generation）**。產生的目標碼為 Java Assembly Language，並透過 `javaa` 工具轉譯為 JVM 可執行的 `.class` 檔。
 
 ---
 
-## 📁 Project Structure
+## 📁 專案結構
+
 ```
 .
-├── Makefile                # Build script
-├── bin/sd                 # Final executable
-├── build/                 # Object files and intermediates
-├── src/                   # Compiler source code (scanner, parser, analyzer)
-├── input/                 # Test case programs (.sd)
-│   ├── case1.sd           # Test: constant folding & errors
-│   ├── case2.sd           # Test: array declaration/index
-│   ├── case3.sd           # Test: loop syntax
-│   ├── case4.sd           # Test: functions & type checks
+├── Makefile               # 編譯與測試腳本
+├── bin/sd                 # 編譯器執行檔
+├── build/                 # 中間產物與物件檔
+├── src/                   # 原始碼：scanner、parser、semantic analyzer、codegen
+├── input/                 # 測試檔案（.sd）
+│   ├── case1.sd           # 浮點運算與比較
+│   ├── case2.sd           # 字串串接範例
+│   ├── case3.sd           # if-else if-else 結構
+│   ├── case4.sd           # foreach 變數範例
+│   ├── case5.sd           # 印出前 30 個質數
+│   ├── case6.sd           # do-while 迴圈範例
 ```
 
 ---
 
-## 🔧 Build Instructions
+## 🔧 編譯與執行方式
 
-To compile the project:
+### 編譯整體專案
 
 ```bash
 make
-````
+```
 
-To run the compiler on a `.sd` file:
+### 執行編譯器並產生 Java Assembly
 
 ```bash
 ./bin/sd input/case1.sd
 ```
 
----
+此動作會產生 `case1.j`，接著可用 Java Assembler 組譯並執行：
 
-## ✅ Supported Language Features
+```bash
+./javaa case1.j
+java case1
+```
 
-### Basic Types
+或使用快捷方式：
 
-* `int`, `float`, `double`
-* `bool`, `string`
-* Fixed-size `array`
-
-### Statements
-
-* Variable/constant declarations
-* `if`, `if-else`, `while`, `do-while`, `for`, `foreach`
-* `print`, `println`, `read`, `return`
-
-### Expressions
-
-* Arithmetic: `+`, `-`, `*`, `/`, `%`
-* Logic: `!`, `&&`, `||`
-* Comparison: `<`, `>`, `==`, `!=`, etc.
-* String concatenation (`+`)
-* Constant folding at compile-time
-
-### Functions
-
-* Return values & parameter type checking
-* Array parameter passing
-* Function calls with argument validation
+```bash
+make test-java TEST=case1
+```
 
 ---
 
-## 🧪 Test Case Overview
+## ✅ 支援的語言功能
 
-All test files are under `input/`. Each file tests distinct semantic areas:
+### 基本型別
 
-### `case1.sd` – Constant Expressions & Folding
+* `int`, `float`
+* `bool`, `const string`
 
-* Compile-time evaluation of numeric/boolean/string expressions
-* Implicit type conversions
-* Division/modulus by zero (compile-time detection)
+### 敘述（Statements）
 
-### `case2.sd` – Array Semantics
+* 宣告與初始化 (`const` / `var`)
+* 控制結構：`if`、`if-else`、`while`、`do-while`、`for`、`foreach`
+* 輸出：`print`、`println`
+* `return`
 
-* Array declaration (valid/invalid size)
-* Multidimensional array access
-* Index type and bounds checking
+### 運算式（Expressions）
 
-### `case3.sd` – Loops & Foreach
+* 算術運算：`+`, `-`, `*`, `/`, `%`
+* 邏輯運算：`!`, `&&`, `||`
+* 比較運算：`<`, `>`, `<=`, `>=`, `==`, `!=`
+* 字串常數串接：`"a" + "b"`
+* 常數摺疊（Constant Folding）
 
-* `for`, `do-while`, `foreach` usage
-* Valid/invalid foreach range (start must be less than end)
-* Multiple loop variables
+### 函式
 
-### `case4.sd` – Function Semantics
-
-* Return type validation
-* Argument type/count checking
-* Array parameter dimensions
-* Name conflicts (e.g., variable name same as function)
-
----
-
-## ⚠️ Semantic Checks Performed
-
-* ❌ Type mismatches (assignment, function call, return)
-* ❌ Division by constant zero
-* ❌ Redeclaration errors
-* ❌ Illegal conversions (with warnings for implicit cast)
-* ❌ Invalid array accesses or dimensions
-* ❌ Conflicting names (function vs. variable)
-* ⚠️ Implicit type conversion warnings
-* ✅ Constant folding and propagation
+* 傳回值與參數型別檢查
+* 參數傳遞與函式呼叫驗證
+* 回傳整數或無傳回值（`void`）
 
 ---
 
-## 📌 Known Limitations
+## ⚙️ Code Generation（Java Assembly）
 
-* No code generation or runtime execution
-* Runtime array bounds are not checked
-* No type inference; all types must be explicit
+生成 `.j` 檔案為 JVM 的中介語言，經 `javaa` 組譯器轉換為可執行的 `.class`。
+
+### 限制
+
+* 不支援 、陣列、`read` 敘述
+* 字串僅可用於 `print/println`，不支援字串變數
+* 不支援字串指定與運算
+
+### 對應映射（部分）
+
+| sD 語法       | JVM Assembly                                      |
+| ----------- | ------------------------------------------------- |
+| `a = 5`     | `sipush 5` + `putstatic int example.a`            |
+| `b = a + 1` | `getstatic` + `sipush` + `iadd` + `istore`        |
+| `if` 條件判斷   | `isub` + `iflt` 等條件跳躍指令                           |
+| `print` 字串  | `ldc "str"` + `invokevirtual println(...)`        |
+| `function`  | `method public static ...` + `ireturn` 或 `return` |
+| `call`      | `invokestatic` 呼叫靜態函式                             |
 
 ---
 
-## ✍️ Authors & Acknowledgements
+## 🧪 測資說明
 
-Developed for \[Compiler Project 2], Department of Computer Science NTUST, Spring 2025.
-Author: \[Ning / B11110524]
+測資位於 `input/` 目錄下，每個 `.sd` 檔案測試不同語意：
+
+| 檔名       | 測試項目                 |
+| -------- | -------------------- |
+| case1.sd | 浮點數運算與比較        |
+| case2.sd | 字串串接                 |
+| case3.sd | `if-else if-else` 結構 |
+| case4.sd | `foreach` 與區塊變數範圍    |
+| case5.sd | 印出前 30 個質數           |
+| case6.sd | `do-while` 迴圈範例      |
 
 ---
 
+## 📄 執行流程範例
+
+以下以 `case1.sd` 為例：
+
+1. 編譯 `.sd` 檔：
+
+   ```bash
+   ./bin/sd input/case1.sd
+   ```
+
+2. 產出 `case1.j` Java Assembly 檔
+
+3. 使用 `javaa` 組譯並執行：
+
+   ```bash
+   ./javaa case1.j
+   java case1
+   ```
+
+---
+
+## ✍️ 作者與課程資訊
+
+本專案為國立臺灣科技大學 資訊工程系「Compiler Project 3」課程作業
+指導老師：Prof. \[Name]
+作者：B11110524 / Ning
+學期：春季班 2025
+
+---
