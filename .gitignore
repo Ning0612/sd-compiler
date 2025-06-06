@@ -17,6 +17,8 @@
 # 可選的測試執行結果或暫存
 *.log
 *.tmp
+*.class
+*.j
 
 
 # CTags / IDE 檔案

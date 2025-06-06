@@ -6,7 +6,9 @@
 #include <vector>
 #include <string> 
 #include <fstream>
-#include <filesystem>
+#include <experimental/filesystem>  
+
+namespace fs = std::experimental::filesystem;  
 
 extern int  yylex();
 extern int  yylineno;
@@ -19,6 +21,7 @@ void yyerror(const char* s){
     std::exit(1);
 }
 %}
+
 /* ---------- token type ---------- */
 %union{
     int ival;
@@ -1277,7 +1280,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::filesystem::path p(argv[1]);
+    fs::path p(argv[1]);  
     std::string fileName = p.stem().string() + ".j";
     std::string baseName = p.stem().string();
 
@@ -1314,7 +1317,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (SemanticError::hasError() || result != 0) {
-        std::filesystem::remove(fileName.c_str()); // Remove the output file if there are errors
+        fs::remove(fileName.c_str()); 
     }
 
     return result;

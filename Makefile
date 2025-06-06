@@ -32,7 +32,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lstdc++fs
 
 # ────────────── Parser & Scanner ───────
 $(SRC_DIR)/y.tab.cpp $(SRC_DIR)/y.tab.hpp: $(SRC_DIR)/p3_parser.y

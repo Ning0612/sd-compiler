@@ -147,7 +147,6 @@ make test-java TEST=case1
 ## ✍️ 作者與課程資訊
 
 本專案為國立臺灣科技大學 資訊工程系「Compiler Project 3」課程作業
-指導老師：Prof. \[Name]
 作者：B11110524 / Ning
 學期：春季班 2025
 
