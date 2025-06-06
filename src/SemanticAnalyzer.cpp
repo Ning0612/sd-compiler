@@ -555,7 +555,7 @@ ExprInfo* unaryOpResult(bool isMinus, const ExprInfo& expr, Context* ctx, int li
 
 /*───────── check is the expression a INC or DEC ─────────*/
 // true for increment, false for decrement
-ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, Context* ctx, int lineno) {
+ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, std::vector<std::string>* fileContent, int lineno) {
     ExprInfo *exprPtr = ((sym != nullptr) ? sym->getExprInfo() : makeInvalidExpr());
     ExprInfo expr = *exprPtr; delete exprPtr;
     std::string opStr = (op ? "++" : "--");
@@ -582,34 +582,34 @@ ExprInfo *checkIncDecValid(const bool& op, const bool& relood, Symbol* sym, Cont
     if (sym != nullptr) {
         if (sym->index == -1) {
             if (sym->type->base == BK_Int) {
-                ctx->fileContent.push_back("        getstatic int " + sym->name);
-                ctx->fileContent.push_back("        ldc 1");
-                ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
-                ctx->fileContent.push_back("        putstatic int " + sym->name);
-                if (relood) ctx->fileContent.push_back("        getstatic int " + sym->name);
+                fileContent->push_back("        getstatic int " + sym->name);
+                fileContent->push_back("        ldc 1");
+                fileContent->push_back((op ? "        iadd" : "        isub"));
+                fileContent->push_back("        putstatic int " + sym->name);
+                if (relood) fileContent->push_back("        getstatic int " + sym->name);
 
             } else if (sym->type->base == BK_Float) {
-                ctx->fileContent.push_back("        getstatic float " + sym->name);
-                ctx->fileContent.push_back("        ldc 1.0f");
-                ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
-                ctx->fileContent.push_back("        putstatic float " + sym->name);
-                if (relood) ctx->fileContent.push_back("        getstatic float " + sym->name);
+                fileContent->push_back("        getstatic float " + sym->name);
+                fileContent->push_back("        ldc 1.0f");
+                fileContent->push_back((op ? "        fadd" : "        fsub"));
+                fileContent->push_back("        putstatic float " + sym->name);
+                if (relood) fileContent->push_back("        getstatic float " + sym->name);
             }
         }
         else {
             if (sym->type->base == BK_Int) {
-                ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                ctx->fileContent.push_back("        ldc 1");
-                ctx->fileContent.push_back((op ? "        iadd" : "        isub"));
-                ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
-                if (relood) ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                fileContent->push_back("        iload " + std::to_string(sym->index));
+                fileContent->push_back("        ldc 1");
+                fileContent->push_back((op ? "        iadd" : "        isub"));
+                fileContent->push_back("        istore " + std::to_string(sym->index));
+                if (relood) fileContent->push_back("        iload " + std::to_string(sym->index));
 
             } else if (sym->type->base == BK_Float) {
-                ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                ctx->fileContent.push_back("        ldc 1.0f");
-                ctx->fileContent.push_back((op ? "        fadd" : "        fsub"));
-                ctx->fileContent.push_back("        fstore " + std::to_string(sym->index));
-                if (relood) ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                fileContent->push_back("        fload " + std::to_string(sym->index));
+                fileContent->push_back("        ldc 1.0f");
+                fileContent->push_back((op ? "        fadd" : "        fsub"));
+                fileContent->push_back("        fstore " + std::to_string(sym->index));
+                if (relood) fileContent->push_back("        fload " + std::to_string(sym->index));
             }
         }
 

@@ -262,8 +262,8 @@ func_decl
         declaration += ")";
 
         ctx->fileContent.push_back(declaration);
-        ctx->fileContent.push_back("    max_stack 15");
-        ctx->fileContent.push_back("    max_locals 15");
+        ctx->fileContent.push_back("    max_stack 31");
+        ctx->fileContent.push_back("    max_locals 31");
         ctx->fileContent.push_back("    {");
 
         declareFunction(funcName, $1, paramList, ctx->typePool, ctx->symTab, yylineno);
@@ -313,8 +313,8 @@ func_decl
             ctx->fileContent.push_back(declaration);
         }
         
-        ctx->fileContent.push_back("    max_stack 15");
-        ctx->fileContent.push_back("    max_locals 15");
+        ctx->fileContent.push_back("    max_stack 31");
+        ctx->fileContent.push_back("    max_locals 31");
         ctx->fileContent.push_back("    {");
 
         declareFunction(funcName, ctx->typePool.make(BK_Void), paramList, ctx->typePool, ctx->symTab, yylineno);
@@ -432,7 +432,7 @@ simple_stmt
             case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)"); break;
             case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)"); break;
             case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)"); break;
-            default: SemanticError("unsupported type for println", yylineno);
+            default: break;
         }
     }
     | READ lvalue SEMICOLON {
@@ -443,16 +443,16 @@ simple_stmt
         SemanticError("read statement not supported in code generation", yylineno);
     }
     | lvalue INC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, ctx, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, &ctx->fileContent, yylineno);
      }
     | lvalue DEC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, ctx, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, &ctx->fileContent, yylineno);
      }
     | INC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, ctx, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, &ctx->fileContent, yylineno);
      }
     | DEC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, ctx, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, &ctx->fileContent, yylineno);
     }
     | SEMICOLON
     ;
@@ -586,18 +586,200 @@ loop_stmt
         ctx->fileContent.push_back("        nop");
         ctx->whileLabels.pop_back();
     }
-    | FOR LPAREN for_simple_opt SEMICOLON expression SEMICOLON for_simple_opt RPAREN statement{
-        ExprInfo expr = *$5; delete $5;
+    | FOR LPAREN for_simple_opt SEMICOLON {
+        ctx->fileContent.insert(ctx->fileContent.end(), ctx->forOpContent.begin(), ctx->forOpContent.end());
+        ctx->forOpContent.clear();
+        ctx->fileContent.push_back("ForBegin" + std::to_string(ctx->forLabelCounter) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->forLabels.push_back(ctx->forLabelCounter);
+        ctx->forLabelCounter++;
+    } expression SEMICOLON{
+        ExprInfo expr = *$6; delete $6;
         if (expr.isValid) checkBoolExpr("for", expr, yylineno);
+        if (expr.isConst) emitConst(expr, ctx);
+        ctx->fileContent.push_back("        ifeq ForEnd" + std::to_string(ctx->forLabels.back()));
+    } for_simple_opt RPAREN statement{
+        ctx->fileContent.insert(ctx->fileContent.end(), ctx->forOpContent.begin(), ctx->forOpContent.end());
+        ctx->forOpContent.clear();
+        ctx->fileContent.push_back("        goto ForBegin" + std::to_string(ctx->forLabels.back()));
+        ctx->fileContent.push_back("ForEnd" + std::to_string(ctx->forLabels.back()) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->forLabels.pop_back();
     }
-    | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
-        ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
-        std::string id = *$3; delete $3;
-        if (from.isValid && to.isValid) {
-            checkForeachRange(from, to, yylineno);
+| FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN {
+    ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
+    std::string id = *$3; delete $3;
+    if (from.isValid && to.isValid) {
+        checkForeachRange(from, to, yylineno);
+    }
+    checkForeachIndex(ctx->symTab.lookup(id), yylineno);
+
+    Symbol* sym = ctx->symTab.lookup(id);
+    if (sym != nullptr) {
+        tryDeclareVarable(ctx->symTab, VarInit("_to", ctx->typePool.make(BK_Int)), ctx->typePool.make(BK_Int), yylineno);
+        tryDeclareVarable(ctx->symTab, VarInit("_delta", ctx->typePool.make(BK_Int)), ctx->typePool.make(BK_Int), yylineno);
+
+        Symbol* toSym = ctx->symTab.lookup("_to");
+        Symbol* deltaSym = ctx->symTab.lookup("_delta");
+
+        // 1. 設定 _to 變數
+        if (to.isConst) {
+            switch (to.type->base) {
+                case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(to.iVal)); break;
+                case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(to.fVal) + "f"); break;
+                case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(to.bVal ? "1" : "0")); break;
+                default: break;
+            }
         }
-        checkForeachIndex(ctx->symTab.lookup(id), yylineno);
+
+        if (toSym->index != -1) {
+            ctx->fileContent.push_back("        istore " + std::to_string(toSym->index));
+        } else {
+            ctx->fileContent.push_back("        putstatic int " + toSym->name);
+        }
+
+        // 2. 初始化迴圈變數 (id = from)
+        if (from.isConst) {
+            switch (from.type->base) {
+                case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(from.iVal)); break;
+                case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(from.fVal) + "f"); break;
+                case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(from.bVal ? "1" : "0")); break;
+                default: break;
+            }
+        }
+
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        putstatic int " + sym->name);
+        }
+
+        // 3. 計算 delta (from < to ? 1 : -1)
+        // 載入 from 和 to 進行比較
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + sym->name);
+        }
+        
+        if (toSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+        }
+
+        ctx->fileContent.push_back("        isub");  // from - to
+        ctx->fileContent.push_back("        iflt ForEachDelta" + std::to_string(ctx->foreachDeltaCounter));
+        ctx->fileContent.push_back("        ldc -1");  // from >= to, delta = -1
+        ctx->fileContent.push_back("        goto ForEachDelta" + std::to_string(ctx->foreachDeltaCounter + 1));
+        ctx->fileContent.push_back("ForEachDelta" + std::to_string(ctx->foreachDeltaCounter) + ":");
+        ctx->fileContent.push_back("        ldc 1");   // from < to, delta = 1
+        ctx->fileContent.push_back("ForEachDelta" + std::to_string(ctx->foreachDeltaCounter + 1) + ":");
+        ctx->fileContent.push_back("        nop");
+
+        // 儲存 delta
+        if (deltaSym->index != -1) {
+            ctx->fileContent.push_back("        istore " + std::to_string(deltaSym->index));
+        } else {
+            ctx->fileContent.push_back("        putstatic int " + deltaSym->name);
+        }
+
+        // 4. 迴圈開始
+        ctx->fileContent.push_back("ForEachBegin" + std::to_string(ctx->forLabelCounter) + ":");
+        ctx->fileContent.push_back("        nop");
+        ctx->forLabels.push_back(ctx->forLabelCounter);
+        
+        // 5. 迴圈條件檢查 - 使用 isub 和符號判斷
+        // 先檢查 delta 的符號來決定比較方式
+        if (deltaSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+        }
+        
+        ctx->fileContent.push_back("        ifgt ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter));
+        
+        // delta = 1 (遞增)：檢查 current - to，如果 > 0 則結束
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + sym->name);
+        }
+        
+        if (toSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+        }
+        
+        ctx->fileContent.push_back("        isub");  // current - to
+        ctx->fileContent.push_back("        iflt ForEachEnd" + std::to_string(ctx->forLabelCounter));
+        ctx->fileContent.push_back("        goto ForEachStatement" + std::to_string(ctx->forLabelCounter));
+        
+        // delta = -1 (遞減)：檢查 current - to，如果 < 0 則結束
+        ctx->fileContent.push_back("ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter) + ":");
+        
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + sym->name);
+        }
+        
+        if (toSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + toSym->name);
+        }
+        
+        ctx->fileContent.push_back("        isub");  // current - to
+        ctx->fileContent.push_back("        ifgt ForEachEnd" + std::to_string(ctx->forLabelCounter));
+
+        ctx->fileContent.push_back("ForEachStatement" + std::to_string(ctx->forLabelCounter) + ":");
+        ctx->fileContent.push_back("        nop");
+
+        ctx->foreachDeltaCounter += 2;
+        ctx->forLabelCounter++;
+        ctx->forEachId.push_back(id);
     }
+} statement {
+    // 迴圈體執行完後，更新迴圈變數
+    std::string loopId = ctx->forEachId.back();
+    ctx->forEachId.pop_back();
+    
+    Symbol* sym = ctx->symTab.lookup(loopId);
+    Symbol* deltaSym = ctx->symTab.lookup("_delta");
+    
+    if (sym && deltaSym) {
+        // 載入當前值
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + sym->name);
+        }
+        
+        // 載入 delta
+        if (deltaSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
+        } else {
+            ctx->fileContent.push_back("        getstatic int " + deltaSym->name);
+        }
+        
+        ctx->fileContent.push_back("        iadd");  // current + delta
+        
+        // 儲存更新後的值
+        if (sym->index != -1) {
+            ctx->fileContent.push_back("        istore " + std::to_string(sym->index));
+        } else {
+            ctx->fileContent.push_back("        putstatic int " + sym->name);
+        }
+    }
+    
+    // 跳回迴圈開始
+    ctx->fileContent.push_back("        goto ForEachBegin" + std::to_string(ctx->forLabels.back()));
+    ctx->fileContent.push_back("ForEachEnd" + std::to_string(ctx->forLabels.back()) + ":");
+    ctx->fileContent.push_back("        nop");
+    ctx->forLabels.pop_back();
+}
     ;
 
 /* For Loop Optional Statements */
@@ -613,18 +795,18 @@ for_simple_item
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
+        ctx->forOpContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
-            ctx->fileContent.push_back("        swap");
+            ctx->forOpContent.push_back("        swap");
         }
 
         switch (expr.type->base) {
-            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)"); break;
-            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)"); break;
-            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)"); break;
-            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)"); break;
+            case BK_Int: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.print(int)"); break;
+            case BK_Float: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.print(float)"); break;
+            case BK_Bool: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)"); break;
+            case BK_String: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)"); break;
             default: SemanticError("unsupported type for println", yylineno);
         }
     }
@@ -632,18 +814,18 @@ for_simple_item
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
+        ctx->forOpContent.push_back("        getstatic java.io.PrintStream java.lang.System.out");
         if (expr.isConst) {
             emitConst(expr, ctx);
         } else {
-            ctx->fileContent.push_back("        swap");
+            ctx->forOpContent.push_back("        swap");
         }
 
         switch (expr.type->base) {
-            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)"); break;
-            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)"); break;
-            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)"); break;
-            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)"); break;
+            case BK_Int: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.println(int)"); break;
+            case BK_Float: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.println(float)"); break;
+            case BK_Bool: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)"); break;
+            case BK_String: ctx->forOpContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)"); break;
             default: SemanticError("unsupported type for println", yylineno);
         }
     }
@@ -654,16 +836,16 @@ for_simple_item
         if (expr.isValid) checkRead(expr, yylineno);
     }
     | lvalue INC {
-        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, ctx, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(true, false, $1, &ctx->forOpContent, yylineno);
      }
     | lvalue DEC {
-        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, ctx, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(false, false, $1, &ctx->forOpContent, yylineno);
      }
     | INC lvalue {
-        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, ctx, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(true, false, $2, &ctx->forOpContent, yylineno);
      }
     | DEC lvalue {
-        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, ctx, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(false, false, $2, &ctx->forOpContent, yylineno);
     }
     ;
 
@@ -678,26 +860,26 @@ assign_no_semi
 
             if (value.isConst) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(value.iVal)); break;
-                    case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
-                    case BK_Bool: ctx->fileContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
-                    case BK_String: ctx->fileContent.push_back("        ldc \"" + value.sVal + "\""); break;
+                    case BK_Int: ctx->forOpContent.push_back("        ldc " + std::to_string(value.iVal)); break;
+                    case BK_Float: ctx->forOpContent.push_back("        ldc " + std::to_string(value.fVal) + "f"); break;
+                    case BK_Bool: ctx->forOpContent.push_back("        ldc " + std::string(value.bVal ? "1" : "0")); break;
+                    case BK_String: ctx->forOpContent.push_back("        ldc \"" + value.sVal + "\""); break;
                     default: break;
                 }
             }
 
             if (sym->index == -1) {
                 switch (target.type->base) {
-                    case BK_Int: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
-                    case BK_Float: ctx->fileContent.push_back("        putstatic float " + sym->name); break;
-                    case BK_Bool: ctx->fileContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Int: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
+                    case BK_Float: ctx->forOpContent.push_back("        putstatic float " + sym->name); break;
+                    case BK_Bool: ctx->forOpContent.push_back("        putstatic int " + sym->name); break;
                     default: break;
                 }
             } else {
                 switch (target.type->base) {
-                    case BK_Int: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
-                    case BK_Float: ctx->fileContent.push_back("        fstore " + std::to_string(sym->index)); break;
-                    case BK_Bool: ctx->fileContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Int: ctx->forOpContent.push_back("        istore " + std::to_string(sym->index)); break;
+                    case BK_Float: ctx->forOpContent.push_back("        fstore " + std::to_string(sym->index)); break;
+                    case BK_Bool: ctx->forOpContent.push_back("        istore " + std::to_string(sym->index)); break;
                     default: break;                
                 }
             }
@@ -874,16 +1056,16 @@ expression
         }
     }
     | INC lvalue %prec INC      {
-        $$ = checkIncDecValid(true, true, $2, ctx, yylineno);
+        $$ = checkIncDecValid(true, true, $2, &ctx->fileContent, yylineno);
      }
     | DEC lvalue %prec DEC      {
-        $$ = checkIncDecValid(false, true, $2, ctx, yylineno);
+        $$ = checkIncDecValid(false, true, $2, &ctx->fileContent, yylineno);
      }
     | lvalue INC %prec POSTINC {
-        $$ = checkIncDecValid(true, true, $1, ctx, yylineno);
+        $$ = checkIncDecValid(true, true, $1, &ctx->fileContent, yylineno);
      }
     | lvalue DEC %prec POSTDEC {
-        $$ = checkIncDecValid(false, true, $1, ctx, yylineno);
+        $$ = checkIncDecValid(false, true, $1, &ctx->fileContent, yylineno);
     }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {
@@ -905,21 +1087,23 @@ expression
         }
 
         if(sym != nullptr) {
-            if (sym->index == -1) {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        getstatic float " + sym->name);
-                } else if (sym->type->base == BK_Bool) {
-                    ctx->fileContent.push_back("        getstatic int " + sym->name);
-                }
-            } else {
-                if (sym->type->base == BK_Int) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Float) {
-                    ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
-                } else if (sym->type->base == BK_Bool) {
-                    ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+            if (!sym->isConst){
+                if (sym->index == -1) {
+                    if (sym->type->base == BK_Int) {
+                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    } else if (sym->type->base == BK_Float) {
+                        ctx->fileContent.push_back("        getstatic float " + sym->name);
+                    } else if (sym->type->base == BK_Bool) {
+                        ctx->fileContent.push_back("        getstatic int " + sym->name);
+                    }
+                } else {
+                    if (sym->type->base == BK_Int) {
+                        ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    } else if (sym->type->base == BK_Float) {
+                        ctx->fileContent.push_back("        fload " + std::to_string(sym->index));
+                    } else if (sym->type->base == BK_Bool) {
+                        ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+                    }
                 }
             }
         }

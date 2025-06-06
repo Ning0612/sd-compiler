@@ -18,14 +18,19 @@ struct Context {
     std::vector<int> whileLabels;    // Labels for while loops
     std::vector<int> doWhileLabels;  // Labels for do-while loops
 
+    std::vector<std::string> forOpContent; // For storing for loop content
+    std::vector<std::string> forEachId;
+
     int equalLabelCounter = 0;      // E標籤 (== !=)
     int compareLabelCounter = 0;    // C標籤 (> >= < <=)
     int ifFalseLabelCounter = 0;    // IFFalse標籤 (if else)
     int ifExitLabelCounter = 0;     // IExit標籤 (if else exit)
     int forLabelCounter = 0;        // F標籤 (for loop)
-    int foreachLabelCounter = 0; // FEach標籤 (foreach loop)
+    int foreachLabelCounter = 0;    // FEach標籤 (foreach loop)
     int whileLabelCounter = 0;      // W標籤 (while)
     int doWhileLabelCounter = 0;    // D標籤 (do-while)
+
+    int foreachDeltaCounter = 0; // Counter for foreach delta
 
     bool inIfStatement;
     bool ifHasElse;

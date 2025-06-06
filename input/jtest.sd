@@ -1,48 +1,10 @@
+
 void main(){
-    int d, i;
-    d = 3;
-    i = 0;
+    const int to = 34;
+    int i;
 
-    if (i == 0) {
-        println "i is zero";
-        if (d == 0) {
-            println "d is zero";
-        } else if (d < 0) {
-            println "d is negative";
-        } else {
-            println "d is positive";
-        }
-    } else if (i < 0) {
-        println "i is negative";
-    } else {
-        println "i is positive";
-    }
-    
-    while (i < 10) {
+    foreach (i : 0 .. to) {
         print i;
         print " ";
-        i++;
     }
-
-    i = 0;
-    do {
-        println "try";
-        i++;
-    } while (i < 3);
-
-
-    println "";
 }
-
-
-    /*
-    while (i < 10) {
-        print i;
-        print " ";
-        i++;
-    }
-    
-    do {
-        println "try";
-    }while (false);
-    */
