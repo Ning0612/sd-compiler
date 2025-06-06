@@ -10,12 +10,24 @@ class jtest
         istore 1
         ldc 0
         istore 1
-        ldc 0
-        istore 1
-        goto F0
-F1:
         iload 1
-        ldc 10
+        ldc 0
+        isub
+        ifeq E0
+        iconst_0
+        goto E1
+E0:
+        iconst_1
+E1:
+        ifeq I0
+        getstatic java.io.PrintStream java.lang.System.out
+
+        ldc "i is zero"
+        invokevirtual void java.io.PrintStream.println(java.lang.String)
+        goto I1
+I0:
+        iload 1
+        ldc 0
         isub
         iflt C0
         iconst_0
@@ -23,23 +35,19 @@ F1:
 C0:
         iconst_1
 C1:
-F0:
-        ifeq F2
-        iload 1
-        ldc 1
-        iadd
-        istore 1
-        iload 1
+        ifeq I2
         getstatic java.io.PrintStream java.lang.System.out
 
-        swap
-        invokevirtual void java.io.PrintStream.print(int)
+        ldc "i is negative"
+        invokevirtual void java.io.PrintStream.println(java.lang.String)
+        goto I3
+I2:
         getstatic java.io.PrintStream java.lang.System.out
 
-        ldc " "
-        invokevirtual void java.io.PrintStream.print(java.lang.String)
-        goto F1
-F2:
+        ldc "i is positive"
+        invokevirtual void java.io.PrintStream.println(java.lang.String)
+I3:
+I1:
         getstatic java.io.PrintStream java.lang.System.out
 
         ldc ""

@@ -18,6 +18,15 @@ std::string toString(const ExprInfo e){
     return (e.valueKind==VK_String)? e.getString() : (e.valueKind==VK_Int)? std::to_string(e.getInt()) : (e.valueKind==VK_Float)? std::to_string(e.getFloat()) : "";
 }
 
+void emitConst(const ExprInfo& e, Context* ctx) {
+    switch (e.type->base) {
+        case BK_Int:   ctx->fileContent.push_back("        ldc " + std::to_string(e.getInt()));         break;
+        case BK_Float: ctx->fileContent.push_back("        ldc " + std::to_string(e.getFloat()) + "f"); break;
+        case BK_Bool:  ctx->fileContent.push_back("        ldc " + std::to_string(e.getBool() ? 1 : 0));break;
+        case BK_String: ctx->fileContent.push_back("        ldc \"" + e.getString() + "\""); break;
+    }
+}
+
 /*───────── Type Compatibility ─────────*/
 std::string numOpToStr(NumOp op) {
     switch (op) {

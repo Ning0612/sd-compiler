@@ -400,47 +400,20 @@ simple_stmt
     | PRINT expression SEMICOLON {
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
-        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
 
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
         if (expr.isConst) {
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for print", yylineno);
-            }
+            emitConst(expr, ctx);
         } else {
             ctx->fileContent.push_back("        swap");
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for print", yylineno);
-            }
+        }
+
+        switch (expr.type->base) {
+            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)"); break;
+            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)"); break;
+            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)"); break;
+            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)"); break;
+            default: SemanticError("unsupported type for println", yylineno);
         }
     }
     | PRINTLN expression SEMICOLON {
@@ -449,45 +422,17 @@ simple_stmt
 
         ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
         if (expr.isConst) {
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for println", yylineno);
-            }
+            emitConst(expr, ctx);
         } else {
             ctx->fileContent.push_back("        swap");
+        }
 
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for println", yylineno);
-            }
+        switch (expr.type->base) {
+            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)"); break;
+            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)"); break;
+            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)"); break;
+            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)"); break;
+            default: SemanticError("unsupported type for println", yylineno);
         }
     }
     | READ lvalue SEMICOLON {
@@ -602,22 +547,7 @@ if_condition
             
             if (expr.isConst) {
                 // 常數條件：先載入常數值到棧中
-                switch(expr.type->base) {
-                    case BK_Bool:
-                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
-                        break;
-                    case BK_Int:
-                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
-                        break;
-                    case BK_Float:
-                        ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
-                        break;
-                    case BK_String:
-                        ctx->fileContent.push_back("        ldc \"" + expr.getString() + "\"");
-                        break;
-                    default:
-                        break;
-                }
+                emitConst(expr, ctx);
                 
                 // 然後生成條件跳躍（即使是常數也要生成，因為可能有副作用）
                 std::string labelFalse = "I" + std::to_string(ctx->ifLabelCounter++);
@@ -644,119 +574,76 @@ if_condition
     ;
 
 /* Loop Statements */
-/* Loop Statements */
 loop_stmt
-   : WHILE LPAREN {
-       std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
-       std::string labelEnd = "W" + std::to_string(ctx->whileLabelCounter++);
-       ctx->fileContent.push_back(labelBegin + ":");
-       ctx->pendingWhileLabels.push_back({labelBegin, labelEnd});
-   } expression RPAREN {
-       ExprInfo expr = *$4; delete $4;
-       if (expr.isValid) {
-           checkBoolExpr("while", expr, yylineno);
-           std::string labelEnd = ctx->pendingWhileLabels.back().second;
-           if (expr.isConst) {
-               switch(expr.type->base) {
-                   case BK_Bool:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
-                       break;
-                   case BK_Int:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
-                       break;
-                   case BK_Float:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
-                       break;
-                   default:
-                       break;
-               }
-           }
-           ctx->fileContent.push_back("        ifeq " + labelEnd);
-       }
-   } statement {
-       std::string labelBegin = ctx->pendingWhileLabels.back().first;
-       std::string labelEnd = ctx->pendingWhileLabels.back().second;
-       ctx->pendingWhileLabels.pop_back();
-       ctx->fileContent.push_back("        goto " + labelBegin);
-       ctx->fileContent.push_back(labelEnd + ":");
-   }
-   | DO {
-       std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
-       ctx->fileContent.push_back(labelBegin + ":");
-       ctx->pendingWhileLabels.push_back({labelBegin, ""});
-   } statement WHILE LPAREN expression RPAREN SEMICOLON {
-       ExprInfo expr = *$6; delete $6;
-       if (expr.isValid) {
-           checkBoolExpr("do while", expr, yylineno);
-           std::string labelBegin = ctx->pendingWhileLabels.back().first;
-           ctx->pendingWhileLabels.pop_back();
-           if (expr.isConst) {
-               switch(expr.type->base) {
-                   case BK_Bool:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
-                       break;
-                   case BK_Int:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
-                       break;
-                   case BK_Float:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
-                       break;
-                   default:
-                       break;
-               }
-           }
-           ctx->fileContent.push_back("        ifne " + labelBegin);
-       }
-   }
-   | FOR LPAREN {
-       std::string labelCondition = "F" + std::to_string(ctx->forLabelCounter++);
-       std::string labelUpdate = "F" + std::to_string(ctx->forLabelCounter++);
-       std::string labelEnd = "F" + std::to_string(ctx->forLabelCounter++);
-       ctx->pendingForLabels.push_back(std::make_tuple(labelCondition, labelUpdate, labelEnd));
-   } for_simple_opt SEMICOLON {
-       std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
-       ctx->fileContent.push_back("        goto " + labelCondition);
-       std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
-       ctx->fileContent.push_back(labelUpdate + ":");
-   } expression {
-       ExprInfo expr = *$7; delete $7;
-       if (expr.isValid) {
-           checkBoolExpr("for", expr, yylineno);
-           std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
-           std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
-           ctx->fileContent.push_back(labelCondition + ":");
-           if (expr.isConst) {
-               switch(expr.type->base) {
-                   case BK_Bool:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getBool() ? 1 : 0));
-                       break;
-                   case BK_Int:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getInt()));
-                       break;
-                   case BK_Float:
-                       ctx->fileContent.push_back("        ldc " + std::to_string(expr.getFloat()));
-                       break;
-                   default:
-                       break;
-               }
-           }
-           ctx->fileContent.push_back("        ifeq " + labelEnd);
-       }
-   } SEMICOLON for_simple_opt RPAREN statement {
-       std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
-       std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
-       ctx->pendingForLabels.pop_back();
-       ctx->fileContent.push_back("        goto " + labelUpdate);
-       ctx->fileContent.push_back(labelEnd + ":");
-   }
-   | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
-       ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
-       std::string id = *$3; delete $3;
-       if (from.isValid && to.isValid) {
-           checkForeachRange(from, to, yylineno);
-       }
-       checkForeachIndex(ctx->symTab.lookup(id), yylineno);
-   }
+    : WHILE LPAREN {
+        std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
+        std::string labelEnd = "W" + std::to_string(ctx->whileLabelCounter++);
+        ctx->fileContent.push_back(labelBegin + ":");
+        ctx->pendingWhileLabels.push_back({labelBegin, labelEnd});
+    } expression RPAREN {
+        ExprInfo expr = *$4; delete $4;
+        if (expr.isValid) {
+            checkBoolExpr("while", expr, yylineno);
+            std::string labelEnd = ctx->pendingWhileLabels.back().second;
+            if (expr.isConst) emitConst(expr, ctx);
+            ctx->fileContent.push_back("        ifeq " + labelEnd);
+        }
+    } statement {
+        std::string labelBegin = ctx->pendingWhileLabels.back().first;
+        std::string labelEnd = ctx->pendingWhileLabels.back().second;
+        ctx->pendingWhileLabels.pop_back();
+        ctx->fileContent.push_back("        goto " + labelBegin);
+        ctx->fileContent.push_back(labelEnd + ":");
+    }
+    | DO {
+        std::string labelBegin = "W" + std::to_string(ctx->whileLabelCounter++);
+        ctx->fileContent.push_back(labelBegin + ":");
+        ctx->pendingWhileLabels.push_back({labelBegin, ""});
+    } statement WHILE LPAREN expression RPAREN SEMICOLON {
+        ExprInfo expr = *$6; delete $6;
+        if (expr.isValid) {
+            checkBoolExpr("do while", expr, yylineno);
+            std::string labelBegin = ctx->pendingWhileLabels.back().first;
+            ctx->pendingWhileLabels.pop_back();
+            if (expr.isConst) emitConst(expr, ctx);
+            ctx->fileContent.push_back("        ifne " + labelBegin);
+        }
+    }
+    | FOR LPAREN {
+        std::string labelCondition = "F" + std::to_string(ctx->forLabelCounter++);
+        std::string labelUpdate = "F" + std::to_string(ctx->forLabelCounter++);
+        std::string labelEnd = "F" + std::to_string(ctx->forLabelCounter++);
+        ctx->pendingForLabels.push_back(std::make_tuple(labelCondition, labelUpdate, labelEnd));
+    } for_simple_opt SEMICOLON {
+        std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
+        ctx->fileContent.push_back("        goto " + labelCondition);
+        std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
+        ctx->fileContent.push_back(labelUpdate + ":");
+    } expression {
+        ExprInfo expr = *$7; delete $7;
+        if (expr.isValid) {
+            checkBoolExpr("for", expr, yylineno);
+            std::string labelCondition = std::get<0>(ctx->pendingForLabels.back());
+            std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
+            ctx->fileContent.push_back(labelCondition + ":");
+            if (expr.isConst) emitConst(expr, ctx);
+            ctx->fileContent.push_back("        ifeq " + labelEnd);
+        }
+    } SEMICOLON for_simple_opt RPAREN statement {
+        std::string labelUpdate = std::get<1>(ctx->pendingForLabels.back());
+        std::string labelEnd = std::get<2>(ctx->pendingForLabels.back());
+        ctx->pendingForLabels.pop_back();
+        ctx->fileContent.push_back("        goto " + labelUpdate);
+        ctx->fileContent.push_back(labelEnd + ":");
+    }
+    | FOREACH LPAREN ID COLON expression DOT DOT expression RPAREN statement{
+        ExprInfo from = *$5; ExprInfo to = *$8; delete $5; delete $8;
+        std::string id = *$3; delete $3;
+        if (from.isValid && to.isValid) {
+            checkForeachRange(from, to, yylineno);
+        }
+        checkForeachIndex(ctx->symTab.lookup(id), yylineno);
+    }
    ;
 
 /* For Loop Optional Statements */
@@ -772,45 +659,19 @@ for_simple_item
         ExprInfo expr = *$2; delete $2;
         if (expr.isValid) checkPrint(expr, yylineno);
 
+        ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
         if (expr.isConst) {
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for print", yylineno);
-            }
+            emitConst(expr, ctx);
         } else {
             ctx->fileContent.push_back("        swap");
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for print", yylineno);
-            }
+        }
+
+        switch (expr.type->base) {
+            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(int)"); break;
+            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(float)"); break;
+            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(boolean)"); break;
+            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.print(java.lang.String)"); break;
+            default: SemanticError("unsupported type for println", yylineno);
         }
     }
     | PRINTLN expression  {
@@ -819,44 +680,17 @@ for_simple_item
 
         ctx->fileContent.push_back("        getstatic java.io.PrintStream java.lang.System.out\n");
         if (expr.isConst) {
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        ldc \"" + expr.sVal + "\"");
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for println", yylineno);
-            }
+            emitConst(expr, ctx);
         } else {
             ctx->fileContent.push_back("        swap");
-            switch (expr.type->base) {
-                case BK_Int:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)");
-                    break;
-                case BK_Float:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)");
-                    break;
-                case BK_Bool:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)");
-                    break;
-                case BK_String:
-                    ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)");
-                    break;
-                default:
-                    SemanticError("unsupported type for println", yylineno);
-            }
+        }
+
+        switch (expr.type->base) {
+            case BK_Int: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(int)"); break;
+            case BK_Float: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(float)"); break;
+            case BK_Bool: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(boolean)"); break;
+            case BK_String: ctx->fileContent.push_back("        invokevirtual void java.io.PrintStream.println(java.lang.String)"); break;
+            default: SemanticError("unsupported type for println", yylineno);
         }
     }
     | READ lvalue  {
@@ -923,34 +757,13 @@ return_stmt
         ExprInfo expr = *$2; delete $2;
         ctx->returnsExpr.push_back(std::make_pair(expr, yylineno));
 
-        if (expr.isConst) {
-            switch (ctx->funcType->base) {
-            case BK_Int:
-                ctx->fileContent.push_back("        ldc " + std::to_string(expr.iVal));
-                break;
-            case BK_Float:
-                ctx->fileContent.push_back("        ldc " + std::to_string(expr.fVal) + "f");
-                break;
-            case BK_Bool:
-                ctx->fileContent.push_back("        ldc " + std::string(expr.bVal ? "1" : "0"));
-                break;
-            default:
-                SemanticError("unsupported return type", yylineno);
-            }
-        }
+        if (expr.isConst) emitConst(expr, ctx);
 
         switch (ctx->funcType->base) {
-        case BK_Int:
-            ctx->fileContent.push_back("        ireturn");
-            break;
-        case BK_Float:
-            ctx->fileContent.push_back("        freturn");
-            break;
-        case BK_Bool:
-            ctx->fileContent.push_back("        ireturn");
-            break;
-        default:
-            SemanticError("unsupported return type", yylineno);
+            case BK_Int: ctx->fileContent.push_back("        ireturn"); break;
+            case BK_Float: ctx->fileContent.push_back("        freturn"); break;
+            case BK_Bool: ctx->fileContent.push_back("        ireturn"); break;
+            default: SemanticError("unsupported return type", yylineno);
         }
     }
     ;

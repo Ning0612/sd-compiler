@@ -22,6 +22,9 @@ bool toBool(const ExprInfo e);
 // Convert expression value to string (for const expr)
 std::string toString(const ExprInfo e);
 
+// Emit constant value to context (for const expr)
+void emitConst(const ExprInfo& e, Context* ctx);
+
 /* ─────────────── Operator Types ─────────────── */
 
 enum NumOp { OPADD, OPSUB, OPMUL, OPDIV, OPMOD }; // Numeric ops

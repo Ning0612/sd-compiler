@@ -1,11 +1,28 @@
 void main(){
     int d, i;
     i = 0;
-    
-    for ( i = 0; i < 10; i++ ) {
-        print i;
-        print " ";
+
+    if (i == 0) {
+        println "i is zero";
+    } else if (i < 0) {
+        println "i is negative";
+    } else {
+        println "i is positive";
     }
+
 
     println "";
 }
+
+
+    /*
+    while (i < 10) {
+        print i;
+        print " ";
+        i++;
+    }
+    
+    do {
+        println "try";
+    }while (false);
+    */
