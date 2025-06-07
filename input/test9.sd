@@ -1,0 +1,54 @@
+// 測試函數聲明和調用
+int add(int a, int b) {
+    println "Inside add function";
+    print "a = "; print a; print ", b = "; println b;
+    return a + b;
+}
+
+float multiply(float x, float y) {
+    println "Inside multiply function";
+    print "x = "; print x; print ", y = "; println y;
+    return x * y;
+}
+
+bool isPositive(int n) {
+    println "Inside isPositive function";
+    print "n = "; println n;
+    return n > 0;
+}
+
+int factorial(int n) {
+    print "Computing factorial of "; println n;
+    if (n <= 1)
+        return 1;
+    else
+        return n * factorial(n - 1);
+}
+
+void main() {
+    println "=== Function Test ===";
+    
+    println "Testing add function:";
+    int result = add(5, 3);
+    print "Result = "; println result;
+    
+    println "Testing multiply function:";
+    float product = multiply(2.5, 4.0);
+    print "Product = "; println product;
+    
+    println "Testing isPositive function:";
+    bool positive = isPositive(-5);
+    print "Is -5 positive? "; println positive;
+    
+    println "Testing printMessage function:";
+    
+    println "Testing recursive factorial function:";
+    int fact = factorial(5);
+    print "5! = "; println fact;
+    
+    println "Testing function calls in expressions:";
+    int complex_result = add(factorial(3), 3);
+    print "add(factorial(3), 3) = "; println complex_result;
+    
+    println "=== Test Complete ===";
+}

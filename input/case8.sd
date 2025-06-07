@@ -1,0 +1,7 @@
+void main() {
+    int a = 2, b = 3, c = a + b;
+
+    println a;
+    println b;
+    println c;
+}

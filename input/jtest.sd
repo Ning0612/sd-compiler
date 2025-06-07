@@ -1,10 +1,17 @@
+// 測試基本數據類型和常量
+const int MAX_VALUE = 100;
+const bool FLAG = true;
+const string MSG = "Hello World";
+const float PI = 3.14;
 
-void main(){
-    const int to = 34;
-    int i;
+int globalInt = 10;
+bool globalBool = false;
+float globalFloat = 2.5;
 
-    foreach (i : 0 .. to) {
-        print i;
-        print " ";
-    }
+void main() {
+    int a = 2, b = 3, c = a + b;
+
+    println a;
+    println b;
+    println c;
 }

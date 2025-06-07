@@ -1,0 +1,37 @@
+// 測試複雜表達式
+int getValue() {
+    return 42;
+}
+
+bool checkCondition(int x, int y) {
+    return (x + y) > 10;
+}
+
+int add(int x, int y) {
+    return x + y;
+}
+
+void main() {
+    int a = 5, b = 10, c = 15;
+    float x = 2.5, y = 3.7;
+    
+    // 複雜算術表達式
+    int result = (a + b) * c - a % 3;
+    println result;
+    
+    // 包含函數調用的表達式
+    int total = getValue() + a * 2;
+    println total;
+    
+    // 複雜布爾表達式
+    bool complex = (a < b) && (b < c) || checkCondition(a, b);
+    println complex;
+    
+    // 混合類型表達式
+    float mixed = x + 3.5 / 2.0;
+    println mixed;
+    
+    // 嵌套函數調用
+    bool nested = checkCondition(add(a, b), getValue());
+    println nested;
+}

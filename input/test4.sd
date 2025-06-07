@@ -1,0 +1,32 @@
+// 測試布爾運算
+void main() {
+    println "=== Boolean Expression Test ===";
+    
+    bool a = true, b = false;
+    int x = 5, y = 10;
+    
+    println "Logical operations:";
+    print "a = "; println a;
+    print "b = "; println b;
+    print "a && b = "; println a && b;
+    print "a || b = "; println a || b;
+    print "!a = "; println !a;
+    print "!b = "; println !b;
+    
+    println "Relational operations:";
+    print "x = "; println x;
+    print "y = "; println y;
+    print "x < y = "; println x < y;
+    print "x <= y = "; println x <= y;
+    print "x > y = "; println x > y;
+    print "x >= y = "; println x >= y;
+    print "x == y = "; println x == y;
+    print "x != y = "; println x != y;
+    
+    println "Complex boolean expressions:";
+    print "(x > 0) && (y > 0) = "; println (x > 0) && (y > 0);
+    print "(x < y) || (x == y) = "; println (x < y) || (x == y);
+    print "!(x > y) = "; println !(x > y);
+    
+    println "=== Test Complete ===";
+}

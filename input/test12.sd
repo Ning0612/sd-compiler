@@ -1,0 +1,77 @@
+// 綜合測試程序
+const int SIZE = 10;
+const float RATE = 1.5;
+
+float calculate(float base, float multiplier) {
+    float result = base * multiplier;
+    return result;
+}
+
+
+bool isPrime(int n) {
+    if (n <= 1) return false;
+    if (n <= 3) return true;
+    
+    int i;
+    for (i = 2; i * i <= n; i++) {
+        if (n % i == 0)
+            return false;
+    }
+    return true;
+}
+
+
+void printNumbers(int start, int end) {
+    int i;
+    foreach (i : start .. end) {
+        if (isPrime(i)) {
+            print "Prime: ";
+            println i;
+        } else {
+            print "Composite: ";
+            println i;
+        }
+    }
+}
+
+void main() {
+    println "Comprehensive Test Program";
+    
+    float base = 100.0;
+    float result = calculate(base, RATE);
+    
+    print "Calculated result: ";
+    println result;
+    
+    printNumbers(2, 10);
+    
+    // 測試 do-while 與其他控制結構的組合
+    int counter = 0;
+    do {
+        if (counter % 2 == 0) {
+            print "Even: ";
+        } else {
+            print "Odd: ";
+        }
+        println counter;
+        counter++;
+    } while (counter < 5);
+    
+    // 測試嵌套控制結構
+    int i, j;
+    for (i = 1; i <= 3; i++) {
+        int sum = 0;
+        do {
+            sum = sum + j;
+            j++;
+        } while (j <= i);
+        
+        print "Sum for i = ";
+        print i;
+        print " is ";
+        println sum;
+    }
+    
+    
+    println "Test completed successfully!";
+}

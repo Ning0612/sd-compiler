@@ -1,0 +1,44 @@
+// 測試作用域規則
+int global = 100;
+
+int testFunction(int param) {
+    int local = 50;
+    
+    // 參數和局部變量
+    param = param + local;
+    
+    // 訪問全局變量
+    global = global + 1;
+    
+    return param;
+}
+
+void main() {
+    int main_local = 20;
+    
+    {
+        // 塊作用域
+        int block_var = 30;
+        main_local = main_local + block_var;
+        
+        {
+            // 嵌套塊
+            int nested_var = 40;
+            block_var = block_var + nested_var;
+        }
+        
+        println block_var; // 70
+    }
+    
+    int result = testFunction(main_local);
+    println result; // 70
+    println global; // 101
+    
+    // 同名變量覆蓋
+    {
+        int global = 999;  // 局部變量覆蓋全局變量
+        println global; // 應該是局部的值 999
+    }
+    
+    println global;  // 應該還是全局的值 101
+}

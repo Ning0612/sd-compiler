@@ -1,0 +1,41 @@
+// 測試賦值語句
+int global = 100;
+
+void main() {
+    println "=== Assignment Test ===";
+    
+    int local = 50;
+    
+    println "Initial values:";
+    print "local = "; println local;
+    print "global = "; println global;
+    
+    // 基本賦值
+    local = 25;
+    global = 200;
+    
+    println "After basic assignment:";
+    print "local = "; println local;
+    print "global = "; println global;
+    
+    // 表達式賦值
+    local = global + 10;
+    global = local * 2;
+    
+    println "After expression assignment:";
+    print "local = "; println local;
+    print "global = "; println global;
+    
+    // 遞增遞減
+    println "Testing increment/decrement:";
+    print "local++ = "; local++; println local;
+    print "++local = "; ++local; println local;
+    print "global-- = "; global--; println global;
+    print "--global = "; --global; println global;
+    
+    println "Final values:";
+    print "local = "; println local;
+    print "global = "; println global;
+    
+    println "=== Test Complete ===";
+}

@@ -1,0 +1,47 @@
+// 測試 if-else 語句
+void main() {
+    println "=== Conditional Statement Test ===";
+    
+    int x = 10;
+    print "Testing with x = "; println x;
+    
+    // 簡單 if
+    println "Simple if test:";
+    if (x > 5)
+        println "x is greater than 5";
+    
+    // if-else
+    println "If-else test:";
+    if (x % 2 == 0)
+        println "x is even";
+    else
+        println "x is odd";
+    
+    // 嵌套 if
+    println "Nested if test:";
+    if (x > 0) {
+        if (x < 20) {
+            println "x is between 0 and 20";
+        } else {
+            println "x is >= 20";
+        }
+    } else {
+        println "x is <= 0";
+    }
+    
+    // 複雜條件
+    println "Complex condition test:";
+    if ((x > 5) && (x < 15)) {
+        println "x is between 5 and 15";
+    }
+    
+    // 測試不同的 x 值
+    x = -5;
+    print "Testing with x = "; println x;
+    if (x > 0)
+        println "x is positive";
+    else
+        println "x is not positive";
+    
+    println "=== Test Complete ===";
+}

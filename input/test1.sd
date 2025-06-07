@@ -1,0 +1,26 @@
+// 測試基本數據類型和常量
+const int MAX_VALUE = 100;
+const bool FLAG = true;
+const string MSG = "Hello World";
+const float PI = 3.14;
+
+int globalInt = 10;
+bool globalBool = false;
+float globalFloat = 2.5;
+
+void main() {
+    println "=== Basic Types and Constants Test ===";
+    
+    println "Constants:";
+    print "MAX_VALUE = "; println MAX_VALUE;
+    print "FLAG = "; println FLAG;
+    print "MSG = "; println MSG;
+    print "PI = "; println PI;
+    
+    println "Global variables:";
+    print "globalInt = "; println globalInt;
+    print "globalBool = "; println globalBool;
+    print "globalFloat = "; println globalFloat;
+    
+    println "=== Test Complete ===";
+}

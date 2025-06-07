@@ -159,15 +159,29 @@ var_init_list
             ctx->fileContent.insert(ctx->fileContent.begin() + 2, declaration);
         } else {
             int index = ctx->symTab.lookup(varInit.name)->index;
-            switch (varInit.valueKind) {
-                case VK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
-                case VK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
-                case VK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
-                default:
-                    SemanticError("unsupported type for local variable", yylineno); break;
+
+            if (varInit.isConst) {
+                switch (varInit.valueKind) {
+                    case VK_Int:
+                        ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    case VK_Float:
+                        ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
+                    case VK_Bool:
+                        ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
+                    default:
+                        SemanticError("unsupported type for local variable", yylineno); break;
+                }
+            }else if(varInit.notInitialized){
+                switch (ctx->nowType->base) {
+                    case BK_Int:
+                        ctx->fileContent.push_back("        ldc 0"); break;
+                    case BK_Float:
+                        ctx->fileContent.push_back("        ldc 0.0f"); break;
+                    case BK_Bool:
+                        ctx->fileContent.push_back("        ldc 0"); break;
+                    default:
+                        SemanticError("unsupported type for local variable", yylineno); break;
+                }
             }
 
             switch (ctx->nowType->base) {
@@ -181,7 +195,7 @@ var_init_list
                     SemanticError("unsupported type for local variable", yylineno); break;
             }
         }
-    }
+     }
     | var_init_list COMMA var_init {
         VarInit varInit = *$3; delete $3;
         tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
@@ -198,15 +212,29 @@ var_init_list
             ctx->fileContent.insert(ctx->fileContent.begin() + 2, declaration);
         } else {
             int index = ctx->symTab.lookup(varInit.name)->index;
-            switch (varInit.valueKind) {
-                case VK_Int:
-                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
-                case VK_Float:
-                    ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
-                case VK_Bool:
-                    ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
-                default:
-                    SemanticError("unsupported type for local variable", yylineno); break;
+
+            if (varInit.isConst) {
+                switch (varInit.valueKind) {
+                    case VK_Int:
+                        ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Int) ? varInit.iVal : int(varInit.fVal)) + ""); break;
+                    case VK_Float:
+                        ctx->fileContent.push_back("        ldc " + std::to_string((varInit.valueKind == VK_Float) ? varInit.fVal : float(varInit.iVal)) + "f"); break;
+                    case VK_Bool:
+                        ctx->fileContent.push_back("        ldc " + std::string(varInit.iVal ? "1" : "0")); break;
+                    default:
+                        SemanticError("unsupported type for local variable", yylineno); break;
+                }
+            }else if(varInit.notInitialized){
+                switch (ctx->nowType->base) {
+                    case BK_Int:
+                        ctx->fileContent.push_back("        ldc 0"); break;
+                    case BK_Float:
+                        ctx->fileContent.push_back("        ldc 0.0f"); break;
+                    case BK_Bool:
+                        ctx->fileContent.push_back("        ldc 0"); break;
+                    default:
+                        SemanticError("unsupported type for local variable", yylineno); break;
+                }
             }
 
             switch (ctx->nowType->base) {
@@ -236,9 +264,6 @@ var_init
                 SemanticError("assignment from function", yylineno);
             }
 
-            if (!expr.isConst) {
-                SemanticError("assignment from non-constant", yylineno);
-            }
             $$ = new VarInit(id, expr);
         }
     }
@@ -446,16 +471,16 @@ simple_stmt
         SemanticError("read statement not supported in code generation", yylineno);
     }
     | lvalue INC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(true, false, $1, &ctx->fileContent, ctx->baseName, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(true, 0, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue DEC SEMICOLON {
-        if ($1 != nullptr) delete checkIncDecValid(false, false, $1, &ctx->fileContent, ctx->baseName, yylineno);
+        if ($1 != nullptr) delete checkIncDecValid(false, 0, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | INC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(true, false, $2, &ctx->fileContent, ctx->baseName, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(true, 0, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | DEC lvalue SEMICOLON {
-        if ($2 != nullptr) delete checkIncDecValid(false, false, $2, &ctx->fileContent, ctx->baseName, yylineno);
+        if ($2 != nullptr) delete checkIncDecValid(false, 0, $2, &ctx->fileContent, ctx->baseName, yylineno);
     }
     | SEMICOLON
     ;
@@ -839,16 +864,16 @@ for_simple_item
         if (expr.isValid) checkRead(expr, yylineno);
     }
     | lvalue INC {
-        if ($1 != nullptr)  delete checkIncDecValid(true, false, $1, &ctx->forOpContent, ctx->baseName, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(true, 0, $1, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | lvalue DEC {
-        if ($1 != nullptr)  delete checkIncDecValid(false, false, $1, &ctx->forOpContent, ctx->baseName, yylineno);
+        if ($1 != nullptr)  delete checkIncDecValid(false, 0, $1, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | INC lvalue {
-        if ($2 != nullptr)  delete checkIncDecValid(true, false, $2, &ctx->forOpContent, ctx->baseName, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(true, 0, $2, &ctx->forOpContent, ctx->baseName, yylineno);
      }
     | DEC lvalue {
-        if ($2 != nullptr)  delete checkIncDecValid(false, false, $2, &ctx->forOpContent, ctx->baseName, yylineno);
+        if ($2 != nullptr)  delete checkIncDecValid(false, 0, $2, &ctx->forOpContent, ctx->baseName, yylineno);
     }
     ;
 
@@ -904,6 +929,8 @@ return_stmt
             case BK_Bool: ctx->fileContent.push_back("        ireturn"); break;
             default: SemanticError("unsupported return type", yylineno);
         }
+
+        printf(ctx->funcType->base == BK_Float ? "        freturn\n" : "        ireturn\n");
     }
     ;
 
@@ -1059,16 +1086,16 @@ expression
         }
     }
     | INC lvalue %prec INC      {
-        $$ = checkIncDecValid(true, true, $2, &ctx->fileContent, ctx->baseName, yylineno);
+        $$ = checkIncDecValid(true, 1, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | DEC lvalue %prec DEC      {
-        $$ = checkIncDecValid(false, true, $2, &ctx->fileContent, ctx->baseName, yylineno);
+        $$ = checkIncDecValid(false, 1, $2, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue INC %prec POSTINC {
-        $$ = checkIncDecValid(true, true, $1, &ctx->fileContent, ctx->baseName, yylineno);
+        $$ = checkIncDecValid(true, -1, $1, &ctx->fileContent, ctx->baseName, yylineno);
      }
     | lvalue DEC %prec POSTDEC {
-        $$ = checkIncDecValid(false, true, $1, &ctx->fileContent, ctx->baseName, yylineno);
+        $$ = checkIncDecValid(false, -1, $1, &ctx->fileContent, ctx->baseName, yylineno);
     }
     | LPAREN expression RPAREN       { 
         if (!$2->isValid) {
@@ -1292,7 +1319,9 @@ int main(int argc, char* argv[]) {
     ctx->baseName = baseName;
     ctx->fileContent.push_back("class " + baseName);
     ctx->fileContent.push_back("{");
+    
     int result = yyparse();
+
     ctx->fileContent.push_back("}");
 
     std::ofstream outputFile(fileName);

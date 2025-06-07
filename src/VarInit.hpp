@@ -11,6 +11,8 @@ struct VarInit {
     std::string name;             // Variable name
     Type* constType;              // Type of the variable (null if array dimensions are provided)
     bool isValid;
+    bool isConst;              // Whether the variable is a constant
+    bool notInitialized = false; // Whether the variable is initialized
 
     ValueKind valueKind = VK_None;  // constant value kind
     union {

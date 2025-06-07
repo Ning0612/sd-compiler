@@ -1,0 +1,33 @@
+// 測試算術運算
+void main() {
+    println "=== Arithmetic Expression Test ===";
+    
+    int a = 10, b = 3;
+    float x = 5.5, y = 2.0;
+    
+    println "Integer arithmetic:";
+    print "a = "; println a;
+    print "b = "; println b;
+    print "a + b = "; println a + b;
+    print "a - b = "; println a - b;
+    print "a * b = "; println a * b;
+    print "a / b = "; println a / b;
+    print "a % b = "; println a % b;
+    print "-a = "; println -a;
+    
+    println "Float arithmetic:";
+    print "x = "; println x;
+    print "y = "; println y;
+    print "x + y = "; println x + y;
+    print "x - y = "; println x - y;
+    print "x * y = "; println x * y;
+    print "x / y = "; println x / y;
+    print "-x = "; println -x;
+    
+    println "Complex expressions:";
+    print "(a + b) * (a - b) = "; println (a + b) * (a - b);
+    print "a + b * 2 = "; println a + b * 2;
+    print "(x + 1.0) / 2.0 = "; println (x + 1.0) / 2.0;
+    
+    println "=== Test Complete ===";
+}

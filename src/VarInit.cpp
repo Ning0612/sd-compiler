@@ -3,6 +3,8 @@
 
 // Constructor for variable without type (used for basic declaration)
 VarInit::VarInit(std::string n, Type* t) : name(n), constType(nullptr), isValid(true) {
+    notInitialized = true; // If no type is provided, assume it's not initialized
+
     constType = t; // Set type to null if no specific type is provided
     switch (t->base) {
         case BK_Int:
@@ -26,6 +28,10 @@ VarInit::VarInit(std::string n, Type* t) : name(n), constType(nullptr), isValid(
 // Constructor for variable with specified type
 VarInit::VarInit(std::string n, ExprInfo e) : name(n), isValid(true) {
     constType = e.type;
+    isConst = e.isConst; // Set whether the variable is constant
+    
+    notInitialized = false; // If it's a constant, it should be initialized
+
     switch (constType->base) {
         case BK_Int:
             valueKind = VK_Int;

@@ -1,0 +1,27 @@
+// 測試變量聲明和初始化
+void main() {
+    println "=== Variable Declaration Test ===";
+    
+    int a;
+    int b = 5, c = 10;
+    bool flag1, flag2 = true;
+    float f1 = 1.5, f2 = 2.7;
+    
+    a = 15;
+    flag1 = false;
+    
+    println "Integer variables:";
+    print "a = "; println a;
+    print "b = "; println b;
+    print "c = "; println c;
+    
+    println "Boolean variables:";
+    print "flag1 = "; println flag1;
+    print "flag2 = "; println flag2;
+    
+    println "Float variables:";
+    print "f1 = "; println f1;
+    print "f2 = "; println f2;
+    
+    println "=== Test Complete ===";
+}

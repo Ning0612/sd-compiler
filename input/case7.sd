@@ -1,0 +1,25 @@
+void main(){
+    int a = 5, b = 10;
+    int result = a + b;
+
+    result = a++;
+    print "Result after a++: ";
+    println result; // Should print 5
+    print "Value of a after a++: ";
+    println a; // Should print 6
+
+    result = ++b;
+    print "Result after ++b: ";
+    println result; // Should print 11
+    print "Value of b after ++b: ";
+    println b; // Should print 11
+
+    result = a+++b;
+    print "Result after a+++b: ";
+    println result; // Should print 17 (6 + 11)
+    print "Value of a after a+++b: ";
+    println a; // Should print 7 (6 + 1 from a++)
+    print "Value of b after a+++b: ";
+    println b; // Should print 11 (no change)
+
+}

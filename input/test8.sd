@@ -1,0 +1,47 @@
+// 測試 do-while 循環（您額外實現的功能）
+void main() {
+    println "=== Do-While Loop Test ===";
+    
+    int i = 0;
+    
+    // 基本 do-while
+    println "Basic do-while test:";
+    do {
+        print "do-while iteration i = "; println i;
+        i++;
+    } while (i < 3);
+    
+    // 單行 do-while
+    println "Single statement do-while test:";
+    int x = 5;
+    print "Initial x = "; println x;
+    do {
+        print "x = "; println x;
+        x--;
+    } while (x > 0);
+    print "Final x = "; println x;
+    
+    // 條件為假的情況
+    println "Do-while with false condition test:";
+    int count = 0;
+    do {
+        println "This executes at least once";
+        count++;
+    } while (false);
+    print "Count = "; println count;
+    
+    // 嵌套 do-while
+    println "Nested do-while test:";
+    int outer = 1;
+    do {
+        print "Outer loop: "; println outer;
+        int inner = 1;
+        do {
+            print "  Inner loop: "; println inner;
+            inner++;
+        } while (inner <= 2);
+        outer++;
+    } while (outer <= 2);
+    
+    println "=== Test Complete ===";
+}

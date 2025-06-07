@@ -1,0 +1,45 @@
+// 測試循環語句
+void main() {
+    println "=== Loop Test ===";
+    
+    int i;
+    
+    // while 循環
+    println "While loop test:";
+    i = 0;
+    while (i < 5) {
+        print "while i = "; println i;
+        i++;
+    }
+    
+    // for 循環 (C-style)
+    println "For loop test:";
+    for (i = 0; i < 3; i++) {
+        print "for loop i = "; println i;
+    }
+    
+    // foreach 循環
+    println "Foreach loop test:";
+    foreach (i : 1 .. 5) {
+        print "foreach i = "; println i;
+    }
+    
+    // 嵌套循環
+    println "Nested loop test:";
+    int j;
+    for (i = 1; i <= 2; i++) {
+        for (j = 1; j <= 2; j++) {
+            print "i="; print i; print ", j="; print j; print ", i*j="; println i * j;
+        }
+    }
+    
+    // 循環中的條件語句
+    println "Loop with condition test:";
+    for (i = 1; i <= 10; i++) {
+        if (i % 2 == 0) {
+            print "Even: "; println i;
+        }
+    }
+    
+    println "=== Test Complete ===";
+}
