@@ -4,4 +4,10 @@ void main() {
     println a;
     println b;
     println c;
+
+    if (true) {
+        println "This is true";
+    } else {
+        println "This is false";
+    }
 }

@@ -83,6 +83,6 @@ endif
 
 # ────────────── Clean ──────────────────
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR) $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/y.tab.*
+	rm -rf $(BUILD_DIR) $(BIN_DIR) $(SRC_DIR)/lex.yy.cpp $(SRC_DIR)/y.tab.* *.class *.j
 
 .PHONY: all clean test runtest

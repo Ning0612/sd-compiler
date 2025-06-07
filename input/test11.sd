@@ -14,24 +14,24 @@ int testFunction(int param) {
 }
 
 void main() {
-    int main_local = 20;
+    int mainlocal = 20;
     
     {
         // 塊作用域
-        int block_var = 30;
-        main_local = main_local + block_var;
+        int blockvar = 30;
+        mainlocal = mainlocal + blockvar;
         
         {
             // 嵌套塊
-            int nested_var = 40;
-            block_var = block_var + nested_var;
+            int nestedvar = 40;
+            blockvar = blockvar + nestedvar;
         }
         
-        println block_var; // 70
+        println blockvar; // 70
     }
     
-    int result = testFunction(main_local);
-    println result; // 70
+    int result = testFunction(mainlocal);
+    println result; // 100
     println global; // 101
     
     // 同名變量覆蓋

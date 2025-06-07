@@ -10,8 +10,36 @@ float globalFloat = 2.5;
 
 void main() {
     int a = 2, b = 3, c = a + b;
+    const int d = 5;
+    int e = d * 2;
 
     println a;
     println b;
     println c;
+    println d;
+    println e;
+
+    foreach ( a : 1..5 ) {
+        println a;
+        a = 10;
+    }
+
+    foreach ( a : 10..1 ) {
+        println a;
+        a = 0;
+    }
+
+    foreach ( a : 1..5 ) {
+        print a;
+        print " ";
+    }
+
+    println "";
+
+    foreach ( a : 10..1 ) {
+        print a;
+        print " ";
+    }
+
+    println "";
 }

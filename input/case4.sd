@@ -11,4 +11,16 @@ void main(){
         }
         println "";
     }
+
+    println "";
+
+    foreach (i : a..0) {
+        foreach (j : 0 .. i) {
+            print i;
+            print " ";
+        }
+        println "";
+    }
+    println "";
+    
 }

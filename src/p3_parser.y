@@ -143,7 +143,8 @@ var_decl
     ;
 
 var_init_list
-    : var_init{
+    : 
+    var_init{
         VarInit varInit = *$1; delete $1;
         tryDeclareVarable(ctx->symTab, varInit, ctx->nowType, yylineno);
         
@@ -644,13 +645,13 @@ loop_stmt
 
     Symbol* sym = ctx->symTab.lookup(id);
     if (sym != nullptr) {
-        ctx->symTab.insert(Symbol("_to", ctx->typePool.make(BK_Int), false));
-        ctx->symTab.insert(Symbol("_delta", ctx->typePool.make(BK_Int), false));
+        ctx->symTab.insert(Symbol("@to", ctx->typePool.make(BK_Int), false));
+        ctx->symTab.insert(Symbol("@delta", ctx->typePool.make(BK_Int), false));
 
-        Symbol* toSym = ctx->symTab.lookup("_to");
-        Symbol* deltaSym = ctx->symTab.lookup("_delta");
+        Symbol* toSym = ctx->symTab.lookup("@to");
+        Symbol* deltaSym = ctx->symTab.lookup("@delta");
 
-        // 1. 設定 _to 變數
+        // 1. 設定 @to 變數
         if (to.isConst) {
             switch (to.type->base) {
                 case BK_Int: ctx->fileContent.push_back("        ldc " + std::to_string(to.iVal)); break;
@@ -703,7 +704,6 @@ loop_stmt
         ctx->fileContent.push_back("ForEachDelta" + std::to_string(ctx->foreachDeltaCounter) + ":");
         ctx->fileContent.push_back("        ldc 1");   // from < to, delta = 1
         ctx->fileContent.push_back("ForEachDelta" + std::to_string(ctx->foreachDeltaCounter + 1) + ":");
-        ctx->fileContent.push_back("        nop");
 
         // 儲存 delta
         if (deltaSym->index != -1) {
@@ -714,18 +714,7 @@ loop_stmt
 
         // 4. 迴圈開始
         ctx->fileContent.push_back("ForEachBegin" + std::to_string(ctx->forLabelCounter) + ":");
-        ctx->fileContent.push_back("        nop");
         ctx->forLabels.push_back(ctx->forLabelCounter);
-        
-        // 5. 迴圈條件檢查 - 使用 isub 和符號判斷
-        // 先檢查 delta 的符號來決定比較方式
-        if (deltaSym->index != -1) {
-            ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
-        } else {
-            ctx->fileContent.push_back("        getstatic int " + ctx->baseName + "."+ deltaSym->name);
-        }
-        
-        ctx->fileContent.push_back("        ifgt ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter));
         
         // delta = 1 (遞增)：檢查 current - to，如果 > 0 則結束
         if (sym->index != -1) {
@@ -741,30 +730,17 @@ loop_stmt
         }
         
         ctx->fileContent.push_back("        isub");  // current - to
-        ctx->fileContent.push_back("        iflt ForEachEnd" + std::to_string(ctx->forLabelCounter));
-        ctx->fileContent.push_back("        goto ForEachStatement" + std::to_string(ctx->forLabelCounter));
-        
-        // delta = -1 (遞減)：檢查 current - to，如果 < 0 則結束
-        ctx->fileContent.push_back("ForEachCheckDesc" + std::to_string(ctx->foreachDeltaCounter) + ":");
-        
-        if (sym->index != -1) {
-            ctx->fileContent.push_back("        iload " + std::to_string(sym->index));
+
+        // 載入 delta
+        if (deltaSym->index != -1) {
+            ctx->fileContent.push_back("        iload " + std::to_string(deltaSym->index));
         } else {
-            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + sym->name);
+            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + deltaSym->name);
         }
-        
-        if (toSym->index != -1) {
-            ctx->fileContent.push_back("        iload " + std::to_string(toSym->index));
-        } else {
-            ctx->fileContent.push_back("        getstatic int "  + ctx->baseName + "." + toSym->name);
-        }
-        
-        ctx->fileContent.push_back("        isub");  // current - to
+
+        ctx->fileContent.push_back("        imul");  // current * delta
         ctx->fileContent.push_back("        ifgt ForEachEnd" + std::to_string(ctx->forLabelCounter));
-
-        ctx->fileContent.push_back("ForEachStatement" + std::to_string(ctx->forLabelCounter) + ":");
-        ctx->fileContent.push_back("        nop");
-
+        
         ctx->foreachDeltaCounter += 2;
         ctx->forLabelCounter++;
         ctx->forEachId.push_back(id);
@@ -775,7 +751,7 @@ loop_stmt
     ctx->forEachId.pop_back();
     
     Symbol* sym = ctx->symTab.lookup(loopId);
-    Symbol* deltaSym = ctx->symTab.lookup("_delta");
+    Symbol* deltaSym = ctx->symTab.lookup("@delta");
     
     if (sym && deltaSym) {
         // 載入當前值
