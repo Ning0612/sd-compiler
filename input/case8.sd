@@ -1,13 +1,9 @@
+// Variable initial from variable
+
 void main() {
     int a = 2, b = 3, c = a + b;
 
     println a;
     println b;
     println c;
-
-    if (true) {
-        println "This is true";
-    } else {
-        println "This is false";
-    }
 }

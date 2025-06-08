@@ -1,0 +1,17 @@
+int f(int k){
+    if (k == 0){
+        return 1;
+    } else {
+        return k * f(k - 1);
+    }
+}
+
+void main() {
+    int n = 5;
+    int result = f(n);
+    
+    print "Factorial of ";
+    print n;
+    print " is: ";
+    println result; // Should print 120
+}

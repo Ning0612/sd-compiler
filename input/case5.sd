@@ -1,6 +1,5 @@
 // This program prints the first 30 prime numbers.
 
-int  k;
 bool isPrime(int n) {
     if (n <= 1) return false;
     int i;
@@ -26,6 +25,4 @@ void main(){
         }
     }
     println "";
-
-    println k;
 }

@@ -740,7 +740,7 @@ loop_stmt
 
         ctx->fileContent.push_back("        imul");  // current * delta
         ctx->fileContent.push_back("        ifgt ForEachEnd" + std::to_string(ctx->forLabelCounter));
-        
+
         ctx->foreachDeltaCounter += 2;
         ctx->forLabelCounter++;
         ctx->forEachId.push_back(id);
@@ -905,8 +905,6 @@ return_stmt
             case BK_Bool: ctx->fileContent.push_back("        ireturn"); break;
             default: SemanticError("unsupported return type", yylineno);
         }
-
-        printf(ctx->funcType->base == BK_Float ? "        freturn\n" : "        ireturn\n");
     }
     ;
 
