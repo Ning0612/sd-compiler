@@ -147,6 +147,15 @@ make test-java TEST=case1
 
 ---
 
+## 📦 Repository
+
+```bash
+git clone https://github.com/Ning0612/sd-compiler.git
+cd sd-compiler
+```
+
+---
+
 ## ✍️ 作者與課程資訊
 
 本專案為國立臺灣科技大學 資訊工程系「Compiler Project 3」課程作業
