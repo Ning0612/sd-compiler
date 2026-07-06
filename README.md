@@ -1,165 +1,168 @@
+# sD Compiler
 
----
+Complete compiler coursework project for **sD**, a C-like teaching language. The compiler covers lexical analysis, parsing, semantic analysis, and Java Assembly code generation.
 
-# 🛠️ sD Compiler – Project 3
+> Course project, cleaned public version. This repository is presented as an academic-scale compiler implementation, not a production compiler or optimizing compiler.
 
-本專案實作一個自訂 C-like 教學語言 **sD** 的完整編譯器，涵蓋 **語彙分析**、**語法分析**、**語意分析** 與 **程式碼產生（Code Generation）**。產生的目標碼為 Java Assembly Language，並透過 `javaa` 工具轉譯為 JVM 可執行的 `.class` 檔。
+## Pipeline
 
----
+```
+sD source (.sd)
+  -> scanner (flex)
+  -> parser (yacc/bison)
+  -> semantic analysis
+  -> Java Assembly (.j)
+  -> JVM class file via javaa-compatible assembler
+```
 
-## 📁 專案結構
+## Project Structure
 
 ```
 .
-├── Makefile               # 編譯與測試腳本
-├── bin/sd                 # 編譯器執行檔
-├── build/                 # 中間產物與物件檔
-├── src/                   # 原始碼：scanner、parser、semantic analyzer、codegen
-├── input/                 # 測試檔案（.sd）
-│   ├── case1.sd           # 浮點運算與比較
-│   ├── case2.sd           # 字串串接範例
-│   ├── case3.sd           # if-else if-else 結構
-│   ├── case4.sd           # foreach 變數範例
-│   ├── case5.sd           # 印出前 30 個質數
-│   ├── case6.sd           # do-while 迴圈範例
+├── Makefile
+├── src/                  # scanner, parser, semantic analyzer, code generator
+├── input/                # small self-contained sample programs
+└── javaaPortable/        # Java Assembly tooling; keep attribution/license notes before public release
 ```
 
----
+Generated files such as `y.output`, object files, and submission archives should not be committed in the public version.
 
-## 🔧 編譯與執行方式
-
-### 編譯整體專案
+## Build
 
 ```bash
 make
 ```
 
-### 執行編譯器並產生 Java Assembly
+Run the compiler on a sample program:
 
 ```bash
 ./bin/sd input/case1.sd
 ```
 
-此動作會產生 `case1.j`，接著可用 Java Assembler 組譯並執行：
+This produces a Java Assembly file such as `case1.j`. Assemble and run it with the Java Assembly tool:
 
 ```bash
-./javaa case1.j
+./javaaPortable/javaa case1.j
 java case1
 ```
 
-或使用快捷方式：
+or use the provided shortcut:
 
 ```bash
 make test-java TEST=case1
 ```
 
----
+## Language Snapshot
 
-## ✅ 支援的語言功能
+### Basic Types
 
-### 基本型別
+- `int`, `float`
+- `bool`
+- string constants for `print` / `println`
 
-* `int`, `float`
-* `bool`, `const string`
+### Statements
 
-### 敘述（Statements）
+- variable and constant declarations
+- assignment
+- `if`, `if-else`
+- `while`, `do-while`, `for`, `foreach`
+- `print`, `println`
+- `return`
 
-* 宣告與初始化 (`const` / `var`)
-* 控制結構：`if`、`if-else`、`while`、`do-while`、`for`、`foreach`
-* 輸出：`print`、`println`
-* `return`
+### Expressions
 
-### 運算式（Expressions）
+- arithmetic: `+`, `-`, `*`, `/`, `%`
+- logic: `!`, `&&`, `||`
+- comparisons: `<`, `>`, `<=`, `>=`, `==`, `!=`
+- constant folding for compile-time expressions
 
-* 算術運算：`+`, `-`, `*`, `/`, `%`
-* 邏輯運算：`!`, `&&`, `||`
-* 比較運算：`<`, `>`, `<=`, `>=`, `==`, `!=`
-* 字串常數串接：`"a" + "b"`
-* 常數摺疊（Constant Folding）
+### Functions
 
-### 函式
+- typed parameters
+- return type checks
+- function call validation
+- integer and `void` returns
 
-* 傳回值與參數型別檢查
-* 參數傳遞與函式呼叫驗證
-* 回傳整數或無傳回值（`void`）
+## Grammar Summary
 
----
+This is a compact overview of the implemented language shape, not a replacement for the yacc grammar in `src/p3_parser.y`.
 
-## ⚙️ Code Generation（Java Assembly）
-
-生成 `.j` 檔案為 JVM 的中介語言，經 `javaa` 組譯器轉換為可執行的 `.class`。
-
-### 限制
-
-* 不支援 、陣列、`read` 敘述
-* 字串僅可用於 `print/println`，不支援字串變數
-* 不支援字串指定與運算
-
-### 對應映射（部分）
-
-| sD 語法       | JVM Assembly                                      |
-| ----------- | ------------------------------------------------- |
-| `a = 5`     | `sipush 5` + `putstatic int example.a`            |
-| `b = a + 1` | `getstatic` + `sipush` + `iadd` + `istore`        |
-| `if` 條件判斷   | `isub` + `iflt` 等條件跳躍指令                           |
-| `print` 字串  | `ldc "str"` + `invokevirtual println(...)`        |
-| `function`  | `method public static ...` + `ireturn` 或 `return` |
-| `call`      | `invokestatic` 呼叫靜態函式                             |
-
----
-
-## 🧪 測資說明
-
-所有測試檔案位於 input/ 目錄下，每個 .sd 程式測試特定語意功能與 Code Generation 行為：
-
-| 檔名         | 測試內容說明                             |
-| ---------- | ---------------------------------- |
-| `case1.sd` | 測試整數四則運算與比較運算（包含常數摺疊）              |
-| `case2.sd` | 字串常數與串接測試、`print` 與 `println` 敘述   |
-| `case3.sd` | 多層次條件分支（`if - else if - else`）控制流程 |
-| `case4.sd` | 測試 `foreach` 語法與變數作用域規則            |
-| `case5.sd` | 印出前 30 個質數，測試 `while`、布林邏輯與條件跳躍    |
-| `case6.sd` | `do-while` 迴圈結構與布林判斷的產碼            |
-| `case7.sd` | 自訂函式呼叫與遞迴測試（例如費氏數列）                |
-| `case8.sd` | 綜合測試：變數宣告、運算、控制流程與函式調用             |
-
-
----
-
-## 📄 執行流程範例
-
-以下以 `case1.sd` 為例：
-
-1. 編譯 `.sd` 檔：
-
-   ```bash
-   ./bin/sd input/case1.sd
-   ```
-
-2. 產出 `case1.j` Java Assembly 檔
-
-3. 使用 `javaa` 組譯並執行：
-
-   ```bash
-   ./javaa case1.j
-   java case1
-   ```
-
----
-
-## 📦 Repository
-
-```bash
-git clone https://github.com/Ning0612/sd-compiler.git
-cd sd-compiler
+```bnf
+program        ::= { declaration | function }
+declaration    ::= ("var" | "const") type identifier [ "=" expression ] ";"
+function       ::= type identifier "(" [ parameters ] ")" block
+parameters     ::= parameter { "," parameter }
+parameter      ::= type identifier
+block          ::= "{" { declaration | statement } "}"
+statement      ::= assignment ";"
+                 | if_statement
+                 | while_statement
+                 | do_while_statement
+                 | for_statement
+                 | foreach_statement
+                 | print_statement ";"
+                 | return_statement ";"
+assignment     ::= identifier "=" expression
+expression     ::= literal
+                 | identifier
+                 | function_call
+                 | unary_operator expression
+                 | expression binary_operator expression
 ```
 
----
+## Example
 
-## ✍️ 作者與課程資訊
+sD source:
 
-本專案為國立臺灣科技大學 資訊工程系「Compiler Project 3」課程作業
-作者：B11110524 / Ning
-學期：春季班 2025
+```c
+var int x = 5;
 
----
+int main() {
+    println(x + 1);
+    return 0;
+}
+```
+
+Representative Java Assembly shape:
+
+```asm
+field static int x
+method public static int main()
+    getstatic int example.x
+    sipush 1
+    iadd
+    invokevirtual void java/io/PrintStream/println(int)
+    sipush 0
+    ireturn
+```
+
+Exact generated labels and class names depend on the input file and code-generation path.
+
+## Sample Inputs
+
+The `input/` directory contains small programs for exercising semantic analysis and code generation:
+
+| File | Focus |
+|---|---|
+| `case1.sd` | integer arithmetic, comparison, constant folding |
+| `case2.sd` | string constants and `print` / `println` |
+| `case3.sd` | nested `if` / `else if` / `else` control flow |
+| `case4.sd` | `foreach` syntax and variable scope |
+| `case5.sd` | prime-number loop with boolean logic |
+| `case6.sd` | `do-while` code generation |
+| `case7.sd` | function calls and recursion |
+| `case8.sd` | mixed declarations, control flow, and functions |
+
+## Limitations
+
+- Teaching-language implementation; not an optimizing compiler.
+- No production-grade runtime, diagnostics framework, or incremental compilation.
+- String support is limited to constants used in output statements.
+- Array and `read` support are not part of the current code-generation path.
+- The Java Assembly tool under `javaaPortable/` must be reviewed for attribution and license status before adding a repository-level license.
+
+## Attribution
+
+Developed as compiler coursework in the Department of Computer Science and Information Engineering, National Taiwan University of Science and Technology, Spring 2025.
+
+Author: Ning (Cheng-Ning Wang)

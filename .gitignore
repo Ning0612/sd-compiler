@@ -7,6 +7,8 @@
 # Bison & Flex 產物
 # src/y.tab.*
 # src/lex.yy.cpp
+y.output
+src/y.output
 
 # 編輯器備份檔
 *~
@@ -19,6 +21,8 @@
 *.tmp
 *.class
 *.j
+*.tar.gz
+*.tgz
 
 
 # CTags / IDE 檔案
