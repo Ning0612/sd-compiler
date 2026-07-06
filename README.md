@@ -22,7 +22,7 @@ sD source (.sd)
 ├── Makefile
 ├── src/                  # scanner, parser, semantic analyzer, code generator
 ├── input/                # small self-contained sample programs
-└── javaaPortable/        # Java Assembly tooling; keep attribution/license notes before public release
+└── javaaPortable/        # Java Assembly tooling; third-party historical bundle with preserved notices
 ```
 
 Generated files such as `y.output`, object files, and submission archives should not be committed in the public version.
@@ -159,7 +159,9 @@ The `input/` directory contains small programs for exercising semantic analysis 
 - No production-grade runtime, diagnostics framework, or incremental compilation.
 - String support is limited to constants used in output statements.
 - Array and `read` support are not part of the current code-generation path.
-- The Java Assembly tool under `javaaPortable/` must be reviewed for attribution and license status before adding a repository-level license.
+- The Java Assembly tool under `javaaPortable/` is preserved as third-party historical tooling with its own copyright notices.
+- The repository-level MIT license applies to the original `sd-compiler` source in this repo; do not assume it covers every file under `javaaPortable/`.
+- If you plan to redistribute `javaaPortable/`, verify its upstream license status first or replace it with an external download step.
 
 ## Attribution
 
