@@ -159,9 +159,20 @@ The `input/` directory contains small programs for exercising semantic analysis 
 - No production-grade runtime, diagnostics framework, or incremental compilation.
 - String support is limited to constants used in output statements.
 - Array and `read` support are not part of the current code-generation path.
-- The Java Assembly tool under `javaaPortable/` is preserved as third-party historical tooling with its own copyright notices.
-- The repository-level MIT license applies to the original `sd-compiler` source in this repo; do not assume it covers every file under `javaaPortable/`.
-- If you plan to redistribute `javaaPortable/`, verify its upstream license status first or replace it with an external download step.
+
+## License Boundary
+
+This repository uses the MIT License for the original `sd-compiler` coursework
+source code written for this project.
+
+`javaaPortable/` is preserved only as historical third-party tooling needed to
+assemble generated Java Assembly output. It retains its own upstream copyright
+notices, and its redistribution license has not been fully verified. Do not
+assume the repository-level MIT License covers `javaaPortable/`.
+
+For any redistribution beyond viewing or reproducing the coursework locally,
+the conservative option is to remove `javaaPortable/` and document an external
+download or local build step instead. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Attribution
 
