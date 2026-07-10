@@ -1,0 +1,26 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install parser toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flex bison
+
+      - name: Build compiler
+        run: make
+
+      - name: Compile sample programs to Java Assembly
+        run: |
+          ./bin/sd input/case1.sd
+          test -f case1.j
+          ./bin/sd input/case7.sd
+          test -f case7.j
