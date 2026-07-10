@@ -3,6 +3,7 @@
 Complete compiler coursework project for **sD**, a C-like teaching language. The compiler covers lexical analysis, parsing, semantic analysis, and Java Assembly code generation.
 
 > Course project, cleaned public version. This repository is presented as an academic-scale compiler implementation, not a production compiler or optimizing compiler.
+> This project comes from 113.2 NTUST CS3020301 Compiler Design final coursework. The public cleanup is complete; this repository is not planned for ongoing maintenance.
 
 ## Pipeline
 
