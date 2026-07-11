@@ -2,6 +2,8 @@
 
 Complete compiler coursework project for **sD**, a C-like teaching language. The compiler covers lexical analysis, parsing, semantic analysis, and Java Assembly code generation.
 
+> **課程專案**：國立臺灣科技大學｜113.2｜CS3020301｜編譯器設計｜期末專案
+
 > Course project, cleaned public version. This repository is presented as an academic-scale compiler implementation, not a production compiler or optimizing compiler.
 > This project comes from 113.2 NTUST CS3020301 Compiler Design final coursework. The public cleanup is complete; this repository is not planned for ongoing maintenance.
 
@@ -174,9 +176,3 @@ assume the repository-level MIT License covers `javaaPortable/`.
 For any redistribution beyond viewing or reproducing the coursework locally,
 the conservative option is to remove `javaaPortable/` and document an external
 download or local build step instead. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Attribution
-
-Developed as compiler coursework in the Department of Computer Science and Information Engineering, National Taiwan University of Science and Technology, Spring 2025.
-
-Author: Ning (Cheng-Ning Wang)
